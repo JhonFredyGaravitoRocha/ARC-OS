@@ -364,7 +364,7 @@
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 2;
+                repairTimeLeft -= 1;
                 fill.style.width = repairTimeLeft + "%";
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
