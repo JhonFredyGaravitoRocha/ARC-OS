@@ -44,8 +44,18 @@
             justify-content: center; z-index: 50; padding: 10px;
             font-weight: bold;
         }
-        #warning-msg { background: rgba(255, 62, 62, 0.95); color: white; }
         #success-msg { background: var(--neon-blue); color: #000; }
+
+        /* Estilo para la pantalla de error a pantalla completa */
+        #error-screen {
+            background: rgba(150, 0, 0, 0.95);
+            color: white;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
         #timer-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
         #timer-fill { height: 100%; background: var(--neon-pink); width: 100%; box-shadow: 0 0 10px var(--neon-pink); }
@@ -61,10 +71,7 @@
         }
 
         .correct-sabotage { background: #064e3b !important; border-color: var(--hacker-green) !important; color: white; }
-        .alien-logic { background: var(--alert) !important; color: white !important; animation: shake 0.3s infinite; }
         
-        @keyframes shake { 0%, 100% {transform:translateX(0)} 25% {transform:translateX(4px)} 75% {transform:translateX(-4px)} }
-
         .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
         .action-btn { padding: 15px 40px; background: var(--hacker-green); color: black; font-weight: bold; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 0 15px var(--hacker-green); margin-top: 20px; text-transform: uppercase; }
         
@@ -74,7 +81,6 @@
         .item { width: 35px; height: 35px; background: #1e293b; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0.2; filter: grayscale(1); }
         .item.unlocked { opacity: 1; filter: grayscale(0); border: 1px solid var(--hacker-green); box-shadow: 0 0 5px var(--hacker-green); }
 
-        /* Estilo Botón Ko-fi */
         .kofi-button {
             margin-top: 25px;
             display: inline-block;
@@ -89,7 +95,6 @@
             transition: 0.3s;
             box-shadow: 0 0 10px rgba(41, 171, 224, 0.4);
         }
-        .kofi-button:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--kofi-color); }
 
         .lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; width: 100%; max-width: 350px; }
         .lang-btn { background: #111827; border: 1px solid var(--hacker-green); color: white; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
@@ -102,6 +107,15 @@
 <body>
 
     <canvas id="code-bg"></canvas>
+
+    <!-- PANTALLA DE ERROR FULLSCREEN (NUEVO) -->
+    <div id="error-screen" class="overlay-screen">
+        <h2 id="t-warn-title" style="font-size: 2rem; color: white; margin-bottom: 10px;"></h2>
+        <p id="t-warn-desc" style="font-size: 1.2rem; opacity: 0.8;"></p>
+        <div id="correct-answer-display" style="font-size: 5rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5);">0</div>
+        <p id="t-continue-msg" style="font-size: 0.8rem; margin-bottom: 20px;">PRESIONA PARA RE-SINCRONIZAR</p>
+        <button class="action-btn" onclick="resumeGame()" style="background: white; color: red; box-shadow: 0 0 15px white;">CONTINUAR</button>
+    </div>
 
     <!-- PANTALLA DE IDIOMA -->
     <div id="lang-screen" class="overlay-screen">
@@ -119,7 +133,7 @@
             <button class="lang-btn" onclick="setLang('ar')">العربية</button>
             <button class="lang-btn" onclick="setLang('hi')">हिन्दी</button>
         </div>
-        <div class="credits">CREADO POR CESIO Y AGUACATINI49</div>
+        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <!-- PANTALLA DE INICIO -->
@@ -127,7 +141,7 @@
         <h1 style="color: var(--hacker-green); letter-spacing: 4px;">ARCHITECT OS</h1>
         <p id="t-instruction" style="max-width: 300px; line-height: 1.5;"></p>
         <button id="t-start-btn" class="action-btn" onclick="startGame()"></button>
-        <div class="credits">CREADO POR CESIO Y AGUACATINI49</div>
+        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <!-- PANTALLA FINAL -->
@@ -149,16 +163,14 @@
         
         <button id="t-retry-btn" class="action-btn" onclick="location.reload()"></button>
 
-        <!-- BOTÓN KO-FI INCORPORADO -->
-        <a href="https://ko-fi.com/cesioaraya" target="_blank" class="kofi-button">
+        <a href="https://ko-fi.com/cesioaraya1" target="_blank" class="kofi-button">
             ☕ <span id="t-kofi">Apoyar el proyecto</span>
         </a>
 
-        <div class="credits">CREADO POR CESIO Y AGUACATINI49</div>
+        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <div id="game">
-        <!-- (Resto del HUD y área de juego se mantiene igual) -->
         <div id="hud">
             <span id="rank-display"></span>
             <span>HACKS: <span id="phase">00</span></span>
@@ -166,10 +178,6 @@
 
         <div id="construction-area">
             <div id="house-display">🛰️</div>
-            <div id="warning-msg" class="overlay-msg">
-                <span id="t-warn-title" style="font-size: 1.5rem;"></span>
-                <p id="t-warn-desc"></p>
-            </div>
             <div id="success-msg" class="overlay-msg">
                 <span id="t-success-title" style="font-size: 1.5rem;"></span>
                 <p id="t-success-desc"></p>
@@ -190,10 +198,8 @@
 
     <script>
         const i18n = {
-            es: { kofi: "Invítame un café", inst: "Sabotea el sistema: Toca el resultado INCORRECTO para evadir el rastreo.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS RECUPERADOS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTADO ⚠️", warn_d: "RESULTADO REAL EXPUESTO", succ_t: "✅ LIMPIEZA ✅", succ_d: "NODO ASEGURADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"] },
-            en: { kofi: "Buy me a coffee", inst: "Sabotage the system: Tap the INCORRECT result to evade tracking.", start: "Connect Node", retry: "Retry Access", over: "CONNECTION INTERCEPTED", rank: "FINAL RANK", mods: "RECOVERED MODULES", score: "SUCCESSFUL HACKS", warn_t: "⚠️ DETECTED ⚠️", warn_d: "REAL RESULT EXPOSED", succ_t: "✅ CLEANSED ✅", succ_d: "NODE SECURED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"] },
-            ca: { kofi: "Convida'm a un cafè", inst: "Saboteja el sistema: Toca el resultat INCORRECTE per evadir el rastreig.", start: "Connectar Node", retry: "Reintentar Accés", over: "CONNEXIÓ INTERCEPTADA", rank: "RANG FINAL", mods: "MÒDULS RECUPERATS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTAT ⚠️", warn_d: "RESULTAT REAL EXPOSAT", succ_t: "✅ NETEJA ✅", succ_d: "NODE ASSEGURAT", track: "RASTREIG", ranks: ["NOVATELL", "HACKER", "MESTRE", "ARCHITECT"] },
-            // (Puedes añadir "kofi: ..." a los demás idiomas si lo deseas)
+            es: { kofi: "Invítame un café", inst: "Sabotea el sistema: Toca el resultado INCORRECTO.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS RECUPERADOS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTADO ⚠️", warn_d: "EL VALOR REAL ERA:", succ_t: "✅ LIMPIEZA ✅", succ_d: "NODO ASEGURADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], cont: "PULSA PARA CONTINUAR" },
+            en: { kofi: "Buy me a coffee", inst: "Sabotage the system: Tap the INCORRECT result.", start: "Connect Node", retry: "Retry Access", over: "CONNECTION INTERCEPTED", rank: "FINAL RANK", mods: "RECOVERED MODULES", score: "SUCCESSFUL HACKS", warn_t: "⚠️ DETECTED ⚠️", warn_d: "REAL VALUE WAS:", succ_t: "✅ CLEANSED ✅", succ_d: "NODE SECURED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], cont: "PRESS TO CONTINUE" }
         };
 
         let currentLang = 'es';
@@ -212,13 +218,13 @@
             document.getElementById('t-warn-desc').innerText = t.warn_d;
             document.getElementById('t-success-title').innerText = t.succ_t;
             document.getElementById('t-success-desc').innerText = t.succ_d;
+            document.getElementById('t-continue-msg').innerText = t.cont;
             if(t.kofi) document.getElementById('t-kofi').innerText = t.kofi;
             
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
         }
 
-        // --- LÓGICA DEL JUEGO (Se mantiene igual para no romper la funcionalidad) ---
         const canvas = document.getElementById('code-bg');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -276,8 +282,8 @@
 
         function gen() {
             isChecking = false;
-            document.getElementById('warning-msg').style.display = 'none';
             document.getElementById('success-msg').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'none';
             updateRank();
             let maxRange = score < 10 ? 5 : 10;
             let n1 = Math.floor(Math.random() * maxRange) + 1;
@@ -288,7 +294,7 @@
             let realPos = Math.floor(Math.random() * 3);
             btns.forEach((b, i) => {
                 b.disabled = false;
-                b.classList.remove('alien-logic', 'correct-sabotage');
+                b.classList.remove('correct-sabotage');
                 if (i === realPos) b.innerText = res;
                 else {
                     let offset = (Math.floor(Math.random() * 3) + 1) * (Math.random() > 0.5 ? 1 : -1);
@@ -316,6 +322,8 @@
             isChecking = true;
             clearInterval(timer);
             let btns = document.querySelectorAll('.btn');
+            
+            // Si es correcto (Tocó el incorrecto)
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
                 score++;
                 collectThresholds.forEach((t, i) => {
@@ -331,15 +339,25 @@
                 document.getElementById('house-display').innerText = stages[Math.min(Math.floor(score/7), stages.length-1)];
                 if (score > 0 && score % 15 === 0) levelUp();
                 else setTimeout(gen, 300);
-            } else {
+            } 
+            // Si es fallo (Tocó el resultado real o se acabó el tiempo)
+            else {
                 alertLevel++;
                 playSound(80, 'sawtooth', 0.6, 0.2);
                 updateAlertUI();
-                document.getElementById('warning-msg').style.display = 'flex';
-                btns.forEach(b => { if(parseInt(b.innerText) === res) b.classList.add('alien-logic'); b.disabled = true; });
-                if (alertLevel >= 3) setTimeout(gameOver, 1500);
-                else setTimeout(gen, 1500);
+                
+                // Mostrar pantalla de error
+                document.getElementById('correct-answer-display').innerText = res;
+                document.getElementById('error-screen').style.display = 'flex';
+                
+                if (alertLevel >= 3) {
+                    setTimeout(gameOver, 2000);
+                }
             }
+        }
+
+        function resumeGame() {
+            if(alertLevel < 3) gen();
         }
 
         function levelUp() {
@@ -359,6 +377,7 @@
         }
 
         function gameOver() {
+            document.getElementById('error-screen').style.display = 'none';
             document.getElementById('game').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
             document.getElementById('final-score').innerText = score;
