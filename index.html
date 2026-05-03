@@ -439,8 +439,23 @@
             document.getElementById('game').style.display = 'none';
             document.getElementById('error-screen').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
+    
+            // 1. Mostrar total de Hacks
             document.getElementById('final-score').innerText = score;
+    
+            // 2. Mostrar Rango Final alcanzado
             document.getElementById('final-rank').innerText = i18n[currentLang].ranks[lastRank];
+    
+            // 3. Generar resumen de objetos recuperados
+            const collectionContainer = document.getElementById('collection-end');
+            collectionContainer.innerHTML = ''; // Limpiar previo
+    
+            unlockedItems.forEach((isUnlocked, idx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = isUnlocked ? 'item unlocked' : 'item';
+                itemDiv.innerText = itemIcons[idx];
+                collectionContainer.appendChild(itemDiv);
+            });
         }
 
         const canvas = document.getElementById('code-bg');
