@@ -42,7 +42,6 @@
 
         #house-display { font-size: 3rem; z-index: 5; transition: transform 0.2s; }
 
-        /* --- NUEVO: ESTILO COMBO --- */
         #combo-tag { position: absolute; right: 10px; top: 50px; font-size: 1.2rem; font-weight: 900; color: var(--neon-pink); opacity: 0; transform: scale(0.5); transition: 0.2s; z-index: 20; }
         .overclock-active { animation: rgb-glow 0.5s infinite linear; border-width: 5px !important; }
         @keyframes rgb-glow {
@@ -87,7 +86,6 @@
         .lang-btn { background: #111827; border: 1px solid var(--hacker-green); color: white; padding: 12px 5px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: 'Courier New', monospace; transition: 0.3s; }
         .lang-btn:hover { background: var(--hacker-green); color: black; }
 
-        /* Efecto de partículas */
         .particle { position: absolute; pointer-events: none; background: var(--rank-color); width: 4px; height: 4px; border-radius: 50%; z-index: 100; }
     </style>
 </head>
@@ -95,7 +93,6 @@
 
     <canvas id="code-bg"></canvas>
 
-    <!-- UI ESTRUCTURA -->
     <div id="lang-screen" class="overlay-screen" style="display: flex;">
         <h2 style="color: var(--hacker-green); letter-spacing: 2px;">SELECT INTERFACE</h2>
         <div class="lang-grid">
@@ -175,7 +172,7 @@
             fr: { inst: "SABOTAGE: Touchez le résultat INCORRECT.", start: "CONNECTER NOEUD", retry: "RÉESSAYER", over: "CONNEXION PERDUE", rank: "RANG FINAL", mods: "MODULES", score: "HACKS", warn_t: "SYSTÈME BLOQUÉ", track: "TRAÇAGE", ranks: ["NOVICE", "HACKER", "MAÎTRE", "ARCHITECT"], unlock: "MODULE RÉCUPÉRÉ!", install: "INSTALLER", itemNames: ["NOYAU ÉNERGIE", "CODE FEU", "PARE-FEU ALPHA", "RECEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"] },
             de: { inst: "SABOTAGE: Tippen Sie auf das FALSCHE Ergebnis.", start: "KNOTEN VERBINDEN", retry: "NEUSTART", over: "VERBINDUNG VERLOREN", rank: "END-RANG", mods: "MODULE", score: "HACKS", warn_t: "SYSTEM GESPERRT", track: "VERFOLGUNG", ranks: ["ANFÄNGER", "HACKER", "MEISTER", "ARCHITECT"], unlock: "MODUL GEFUNDEN!", install: "INSTALLIEREN", itemNames: ["ENERGIEKERN", "FEUER-CODE", "FIREWALL ALPHA", "SAT-EMPFÄNGER", "KI-CORTEX", "ANGRIFFS-BOT"] },
             zh: { inst: "破坏行动：点击错误的结果。", start: "连接节点", retry: "重试", over: "连接中断", rank: "最终等级", mods: "模块", score: "入侵次数", warn_t: "系统已锁定", track: "追踪中", ranks: ["新手", "黑客", "大师", "建筑师"], unlock: "模块已恢复！", install: "安装", itemNames: ["能源核心", "烈火代码", "阿尔法防火墙", "卫星接收器", "皮层AI", "突击机器人"] },
-            hi: { inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", start: "नोड कनेक्ट करें", retry: "पुनः प्रयास करें", over: "कनेक्शन टूटा", rank: "अंतिम रैंक", mods: "मॉड्यूल", score: "हैक्स", warn_t: "सिستم लॉक", track: "ट्रैकिंग", ranks: ["नौसिखिया", "हैकर", "मास्टर", "आर्किटेक्ट"], unlock: "मॉड्यूल बरामद!", install: "स्थापित", itemNames: ["ऊर्जा कोर", "अग्नि कोड", "फ़ायरวॉल अल्फा", "सैट रिसीver", "एआई कॉर्टेक्स", "असॉल्ट बॉट"] },
+            hi: { inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", start: "नोड कनेक्ट करें", retry: "पुनः प्रयास करें", over: "कनेक्शन टूटा", rank: "अंतिम रैंक", mods: "मॉड्यूल", score: "हैक्स", warn_t: "सिस्टम लॉक", track: "ट्रैकिंग", ranks: ["नौसिखिया", "हैकर", "मास्टर", "आर्किटेक्ट"], unlock: "मॉड्यूल बरामद!", install: "स्थापित", itemNames: ["ऊर्जा कोर", "अग्नि कोड", "फ़ायरवॉल अल्फा", "सैट रिसीver", "एआई कॉर्टेक्स", "असॉल्ट बॉट"] },
             ar: { inst: "تخريب: اضغط على النتيجة الخاطئة.", start: "توصيل العقدة", retry: "إعادة المحاولة", over: "فقد الاتصال", rank: "الرتبة النهائية", mods: "وحدات", score: "اختراقات", warn_t: "النظام مغلق", track: "تتبع", ranks: ["مبتدئ", "مخترق", "سيد", "المهندس"], unlock: "تم استرداد الوحدة!", install: "تثبيت", itemNames: ["نواة الطاقة", "كود النار", "جدار حماية ألفa", "مستقبل سات", "ذكاء كورتيكس", "روبوت هجومي"] }
         };
 
@@ -218,7 +215,6 @@
             } catch(e) {}
         }
 
-        // --- EFECTOS VISUALES ---
         function screenShake() {
             const game = document.getElementById('game');
             game.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
@@ -265,20 +261,17 @@
             let btns = document.querySelectorAll('.btn');
             
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
-                // ÉXITO
                 combo++;
                 score++;
                 screenShake();
                 if(event) createParticles(event.clientX, event.clientY);
 
-                // Feedback Combo
                 const cTag = document.getElementById('combo-tag');
                 cTag.innerText = `X${combo}`;
                 cTag.style.opacity = combo > 1 ? 1 : 0;
                 cTag.style.transform = 'scale(1.2)';
                 setTimeout(() => cTag.style.transform = 'scale(1)', 100);
 
-                // Modo Overclock
                 if(combo >= 5) document.getElementById('game').classList.add('overclock-active');
 
                 playSound(800 + (combo * 50), 'square', 0.1);
@@ -376,7 +369,6 @@
         }
 
         function startTimer() {
-            // Si hay combo alto, el tiempo es un poco más exigente
             let baseLimit = Math.max(0.6, 5 - (score * 0.12)); 
             let limit = combo > 5 ? baseLimit * 0.8 : baseLimit;
             let current = 100;
