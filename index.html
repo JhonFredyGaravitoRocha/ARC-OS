@@ -112,13 +112,11 @@
     <div id="error-screen">
         <h2 id="t-warn-title" style="font-size: 2rem; color: white; margin-bottom: 10px;"></h2>
         <p id="t-warn-desc" style="font-size: 1.2rem; opacity: 0.8;"></p>
-        <!-- Aquí se mostrará la multiplicación completa -->
         <div id="correct-answer-display" style="font-size: 3.5rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5); white-space: nowrap;">0 × 0 = 0</div>
         <p id="t-continue-msg" style="font-size: 0.8rem; margin-bottom: 20px;"></p>
         <button class="action-btn" onclick="resumeGame()" style="background: white; color: red; box-shadow: 0 0 15px white;">CONTINUAR</button>
     </div>
 
-    <!-- PANTALLA DE IDIOMA -->
     <div id="lang-screen" class="overlay-screen">
         <h2 style="color: var(--hacker-green);">SELECT LANGUAGE</h2>
         <div class="lang-grid">
@@ -137,7 +135,6 @@
         <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
-    <!-- PANTALLA DE INICIO -->
     <div id="start-screen" class="overlay-screen" style="display: none;">
         <h1 style="color: var(--hacker-green); letter-spacing: 4px;">ARCHITECT OS</h1>
         <p id="t-instruction" style="max-width: 300px; line-height: 1.5;"></p>
@@ -145,7 +142,6 @@
         <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
-    <!-- PANTALLA FINAL -->
     <div id="end-screen" class="overlay-screen" style="display: none;">
         <h1 id="t-gameover" style="color: var(--alert);"></h1>
         <div class="stat-box">
@@ -167,6 +163,7 @@
         <a href="https://ko-fi.com/cesioaraya1" target="_blank" class="kofi-button">
             ☕ <span id="t-kofi">Apoyar el proyecto</span>
         </a>
+
         <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
@@ -199,7 +196,7 @@
         };
 
         let currentLang = 'es';
-        let currentN1, currentN2, res; // Variables globales para la operación actual
+        let currentN1, currentN2, res;
 
         function setLang(l) {
             currentLang = l;
@@ -338,11 +335,8 @@
                 alertLevel++;
                 playSound(80, 'sawtooth', 0.6, 0.2);
                 updateAlertUI();
-                
-                // MOSTRAR OPERACIÓN COMPLETA
                 document.getElementById('correct-answer-display').innerText = `${currentN1} × ${currentN2} = ${res}`;
                 document.getElementById('error-screen').style.display = 'flex';
-                
                 if (alertLevel >= 3) {
                     setTimeout(gameOver, 3000);
                 }
