@@ -46,7 +46,6 @@
         }
         #success-msg { background: var(--neon-blue); color: #000; }
 
-        /* Estilo para la pantalla de error a pantalla completa */
         #error-screen {
             background: rgba(150, 0, 0, 0.95);
             color: white;
@@ -55,6 +54,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: fixed;
+            inset: 0;
         }
 
         #timer-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
@@ -102,18 +103,18 @@
 
         .credits { font-size: 0.7rem; color: #4b5563; margin-top: 25px; letter-spacing: 1px; }
     </style>
-<link rel="manifest" href="manifest.json">
 </head>
 <body>
 
     <canvas id="code-bg"></canvas>
 
-    <!-- PANTALLA DE ERROR FULLSCREEN (NUEVO) -->
-    <div id="error-screen" class="overlay-screen">
+    <!-- PANTALLA DE ERROR FULLSCREEN -->
+    <div id="error-screen">
         <h2 id="t-warn-title" style="font-size: 2rem; color: white; margin-bottom: 10px;"></h2>
         <p id="t-warn-desc" style="font-size: 1.2rem; opacity: 0.8;"></p>
-        <div id="correct-answer-display" style="font-size: 5rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5);">0</div>
-        <p id="t-continue-msg" style="font-size: 0.8rem; margin-bottom: 20px;">PRESIONA PARA RE-SINCRONIZAR</p>
+        <!-- Aquí se mostrará la multiplicación completa -->
+        <div id="correct-answer-display" style="font-size: 3.5rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5); white-space: nowrap;">0 × 0 = 0</div>
+        <p id="t-continue-msg" style="font-size: 0.8rem; margin-bottom: 20px;"></p>
         <button class="action-btn" onclick="resumeGame()" style="background: white; color: red; box-shadow: 0 0 15px white;">CONTINUAR</button>
     </div>
 
@@ -166,7 +167,6 @@
         <a href="https://ko-fi.com/cesioaraya1" target="_blank" class="kofi-button">
             ☕ <span id="t-kofi">Apoyar el proyecto</span>
         </a>
-
         <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
@@ -175,7 +175,6 @@
             <span id="rank-display"></span>
             <span>HACKS: <span id="phase">00</span></span>
         </div>
-
         <div id="construction-area">
             <div id="house-display">🛰️</div>
             <div id="success-msg" class="overlay-msg">
@@ -183,26 +182,24 @@
                 <p id="t-success-desc"></p>
             </div>
         </div>
-
         <div id="timer-bar"><div id="timer-fill"></div></div>
         <div id="prob">? x ?</div>
-
         <div class="grid">
             <button class="btn" onclick="check(0)"></button>
             <button class="btn" onclick="check(1)"></button>
             <button class="btn" onclick="check(2)"></button>
         </div>
-        
         <div id="error-dots" style="margin-top:15px; color:var(--alert); font-size:0.9rem; font-weight: bold;"></div>
     </div>
 
     <script>
         const i18n = {
-            es: { kofi: "Invítame un café", inst: "Sabotea el sistema: Toca el resultado INCORRECTO.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS RECUPERADOS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTADO ⚠️", warn_d: "EL VALOR REAL ERA:", succ_t: "✅ LIMPIEZA ✅", succ_d: "NODO ASEGURADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], cont: "PULSA PARA CONTINUAR" },
-            en: { kofi: "Buy me a coffee", inst: "Sabotage the system: Tap the INCORRECT result.", start: "Connect Node", retry: "Retry Access", over: "CONNECTION INTERCEPTED", rank: "FINAL RANK", mods: "RECOVERED MODULES", score: "SUCCESSFUL HACKS", warn_t: "⚠️ DETECTED ⚠️", warn_d: "REAL VALUE WAS:", succ_t: "✅ CLEANSED ✅", succ_d: "NODE SECURED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], cont: "PRESS TO CONTINUE" }
+            es: { kofi: "Invítame un café", inst: "Sabotea el sistema: Toca el resultado INCORRECTO.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS RECUPERADOS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTADO ⚠️", warn_d: "CÁLCULO CORRECTO:", succ_t: "✅ LIMPIEZA ✅", succ_d: "NODO ASEGURADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], cont: "PULSA PARA RE-SINCRONIZAR" },
+            en: { kofi: "Buy me a coffee", inst: "Sabotage the system: Tap the INCORRECT result.", start: "Connect Node", retry: "Retry Access", over: "CONNECTION INTERCEPTED", rank: "FINAL RANK", mods: "RECOVERED MODULES", score: "SUCCESSFUL HACKS", warn_t: "⚠️ DETECTED ⚠️", warn_d: "CORRECT CALCULATION:", succ_t: "✅ CLEANSED ✅", succ_d: "NODE SECURED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], cont: "PRESS TO RE-SYNC" }
         };
 
         let currentLang = 'es';
+        let currentN1, currentN2, res; // Variables globales para la operación actual
 
         function setLang(l) {
             currentLang = l;
@@ -220,7 +217,6 @@
             document.getElementById('t-success-desc').innerText = t.succ_d;
             document.getElementById('t-continue-msg').innerText = t.cont;
             if(t.kofi) document.getElementById('t-kofi').innerText = t.kofi;
-            
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
         }
@@ -240,7 +236,7 @@
         }
         setInterval(drawMatrix, 50);
 
-        let res, score = 0, alertLevel = 0, timer, isChecking = false;
+        let score = 0, alertLevel = 0, timer, isChecking = false;
         const stages = ["🛰️", "📡", "🚀", "🛸", "👾", "☄️", "🌌", "👑"];
         const collectThresholds = [10, 20, 30, 40, 50, 60];
         let unlockedItems = JSON.parse(localStorage.getItem('arch_items')) || [0,0,0,0,0,0];
@@ -272,7 +268,6 @@
             if(score >= 50) rankIdx = 3;
             else if(score >= 30) rankIdx = 2;
             else if(score >= 15) rankIdx = 1;
-            
             const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
             document.getElementById('rank-display').innerText = "NV." + (rankIdx+1) + " " + rankNames[rankIdx];
             document.getElementById('rank-display').style.color = colors[rankIdx];
@@ -286,10 +281,10 @@
             document.getElementById('error-screen').style.display = 'none';
             updateRank();
             let maxRange = score < 10 ? 5 : 10;
-            let n1 = Math.floor(Math.random() * maxRange) + 1;
-            let n2 = Math.floor(Math.random() * 10) + 1;
-            res = n1 * n2;
-            document.getElementById('prob').innerText = `${n1} × ${n2}`;
+            currentN1 = Math.floor(Math.random() * maxRange) + 1;
+            currentN2 = Math.floor(Math.random() * 10) + 1;
+            res = currentN1 * currentN2;
+            document.getElementById('prob').innerText = `${currentN1} × ${currentN2}`;
             let btns = document.querySelectorAll('.btn');
             let realPos = Math.floor(Math.random() * 3);
             btns.forEach((b, i) => {
@@ -323,7 +318,6 @@
             clearInterval(timer);
             let btns = document.querySelectorAll('.btn');
             
-            // Si es correcto (Tocó el incorrecto)
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
                 score++;
                 collectThresholds.forEach((t, i) => {
@@ -340,18 +334,17 @@
                 if (score > 0 && score % 15 === 0) levelUp();
                 else setTimeout(gen, 300);
             } 
-            // Si es fallo (Tocó el resultado real o se acabó el tiempo)
             else {
                 alertLevel++;
                 playSound(80, 'sawtooth', 0.6, 0.2);
                 updateAlertUI();
                 
-                // Mostrar pantalla de error
-                document.getElementById('correct-answer-display').innerText = res;
+                // MOSTRAR OPERACIÓN COMPLETA
+                document.getElementById('correct-answer-display').innerText = `${currentN1} × ${currentN2} = ${res}`;
                 document.getElementById('error-screen').style.display = 'flex';
                 
                 if (alertLevel >= 3) {
-                    setTimeout(gameOver, 2000);
+                    setTimeout(gameOver, 3000);
                 }
             }
         }
