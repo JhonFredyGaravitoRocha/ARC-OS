@@ -53,6 +53,12 @@
 
         .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
         
+        /* TERMINAL STORY STYLES */
+        #terminal-story { text-align: left; max-width: 450px; font-size: 0.9rem; border: 1px solid var(--hacker-green); padding: 20px; background: rgba(0,255,65,0.05); margin-bottom: 20px; box-shadow: 0 0 15px rgba(0,255,65,0.1); }
+        .typing { overflow: hidden; border-right: .15em solid var(--hacker-green); white-space: nowrap; animation: typing 2s steps(40, end), blink-caret .75s step-end infinite; }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--hacker-green); } }
+
         #unlock-screen { background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, rgba(5,10,20,1) 80%); z-index: 500; }
         .unlock-anim { font-size: 7rem; margin: 20px; animation: pulse 0.8s infinite alternate; filter: drop-shadow(0 0 25px var(--neon-blue)); }
 
@@ -109,15 +115,18 @@
     </div>
 
     <div id="start-screen" class="overlay-screen">
-        <h1 style="color: var(--hacker-green); letter-spacing: 4px;">ARCHITECT OS</h1>
-        <p id="t-instruction" style="max-width: 300px; line-height: 1.5;"></p>
+        <div id="terminal-story">
+            <div class="typing" style="color: var(--hacker-green); font-weight: bold;">> INICIANDO PROTOCOLO ARCHITECT...</div>
+            <p id="t-story-body" style="line-height: 1.4; color: #ccc; margin: 15px 0;"></p>
+            <div style="color: var(--neon-pink); font-weight: bold;" id="t-goal">> OBJETIVO: Sabotaje de nodos.</div>
+            <div id="t-instruction" style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;"></div>
+        </div>
         <button id="t-start-btn" class="action-btn" onclick="startGame()"></button>
     </div>
 
     <div id="error-screen" class="overlay-screen">
         <h2 id="t-warn-title" style="color: var(--alert);">SISTEMA BLOQUEADO</h2>
         <div id="repair-msg" style="font-size: 1.1rem; opacity: 0.8;">REPARAR NODO:</div>
-        <!-- El cambio está aquí y en la función handleError -->
         <div id="repair-formula" style="font-size: 2.5rem; margin-top: 10px; color: var(--neon-pink); font-weight: bold;"></div>
         <input type="number" id="repair-input" placeholder="??">
     </div>
@@ -166,15 +175,47 @@
 
     <script>
         const i18n = {
-            es: { inst: "SABOTAJE: Toca el resultado INCORRECTO.", start: "CONECTAR NODO", retry: "REINTENTAR", over: "CONEXIÓN PERDIDA", rank: "RANGO FINAL", mods: "MÓDULOS", score: "HACKS", warn_t: "SISTEMA BLOQUEADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], unlock: "¡MÓDULO RECUPERADO!", install: "INSTALAR", itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"] },
-            en: { inst: "SABOTAGE: Tap the INCORRECT result.", start: "CONNECT NODE", retry: "RETRY ACCESS", over: "CONNECTION LOST", rank: "FINAL RANK", mods: "MODULES", score: "HACKS", warn_t: "SYSTEM LOCKED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], unlock: "MODULE RECOVERED!", install: "INSTALL", itemNames: ["ENERGY CORE", "FIRE CODE", "FIREWALL ALPHA", "SAT RECEIVER", "IA CORTEX", "ASSAULT BOT"] },
-            ca: { inst: "SABOTATGE: Toca el resultat INCORRECTE.", start: "CONNECTAR NODE", retry: "REINTENTAR", over: "CONNEXIÓ PERDUDA", rank: "RANG FINAL", mods: "MÒDULS", score: "HACKS", warn_t: "SISTEMA BLOQUEJAT", track: "RASTREIG", ranks: ["NOVATELL", "HACKER", "MESTRE", "ARCHITECT"], unlock: "MÒDUL RECUPERAT!", install: "INSTAL·LAR", itemNames: ["NUCLI ENERGIA", "CODI IGNIS", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT D'ASSALT"] },
-            pt: { inst: "SABOTAGEM: Toque no resultado INCORRETO.", start: "CONECTAR NÓ", retry: "REENTRAR", over: "CONEXÃO PERDIDA", rank: "CLASSIFICAÇÃO", mods: "MÓDULOS", score: "HACKS", warn_t: "SISTEMA BLOQUEADO", track: "RASTREAMENTO", ranks: ["NOVATO", "HACKER", "MESTRE", "ARCHITECT"], unlock: "MÓDULO RECUPE!", install: "INSTALAR", itemNames: ["NÚCLEO ENERGIA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"] },
-            fr: { inst: "SABOTAGE: Touchez le résultat INCORRECT.", start: "CONNECTER NOEUD", retry: "RÉESSAYER", over: "CONNEXION PERDUE", rank: "RANG FINAL", mods: "MODULES", score: "HACKS", warn_t: "SYSTÈME BLOQUÉ", track: "TRAÇAGE", ranks: ["NOVICE", "HACKER", "MAÎTRE", "ARCHITECT"], unlock: "MODULE RÉCUPÉRÉ!", install: "INSTALLER", itemNames: ["NOYAU ÉNERGIE", "CODE FEU", "PARE-FEU ALPHA", "RECEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"] },
-            de: { inst: "SABOTAGE: Tippen Sie auf das FALSCHE Ergebnis.", start: "KNOTEN VERBINDEN", retry: "NEUSTART", over: "VERBINDUNG VERLOREN", rank: "END-RANG", mods: "MODULE", score: "HACKS", warn_t: "SYSTEM GESPERRT", track: "VERFOLGUNG", ranks: ["ANFÄNGER", "HACKER", "MEISTER", "ARCHITECT"], unlock: "MODUL GEFUNDEN!", install: "INSTALLIEREN", itemNames: ["ENERGIEKERN", "FEUER-CODE", "FIREWALL ALPHA", "SAT-EMPFÄNGER", "KI-CORTEX", "ANGRIFFS-BOT"] },
-            zh: { inst: "破坏行动：点击错误的结果。", start: "连接节点", retry: "重试", over: "连接中断", rank: "最终等级", mods: "模块", score: "入侵次数", warn_t: "系统已锁定", track: "追踪中", ranks: ["新手", "黑客", "大师", "建筑师"], unlock: "模块已恢复！", install: "安装", itemNames: ["能源核心", "烈火代码", "阿尔法防火墙", "卫星接收器", "皮层AI", "突击机器人"] },
-            hi: { inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", start: "नोड कनेक्ट करें", retry: "पुनः प्रयास करें", over: "कनेक्शन टूटा", rank: "अंतिम रैंक", mods: "मॉड्यूल", score: "हैक्स", warn_t: "सिस्टम लॉक", track: "ट्रैकिंग", ranks: ["नौसिखिया", "हैकर", "मास्टर", "आर्किटेक्ट"], unlock: "मॉड्यूल बरामद!", install: "स्थापित", itemNames: ["ऊर्जा कोर", "अग्नि कोड", "फ़ायरवॉल अल्फा", "सैट रिसीver", "एआई कॉर्टेक्स", "असॉल्ट बॉट"] },
-            ar: { inst: "تخريب: اضغط على النتيجة الخاطئة.", start: "توصيل العقدة", retry: "إعادة المحاولة", over: "فقد الاتصال", rank: "الرتبة النهائية", mods: "وحدات", score: "اختراقات", warn_t: "النظام مغلق", track: "تتبع", ranks: ["مبتدئ", "مخترق", "سيد", "المهندس"], unlock: "تم استرداد الوحدة!", install: "تثبيت", itemNames: ["نواة الطاقة", "كود النار", "جدار حماية ألفa", "مستقبل سات", "ذكاء كورتيكس", "روبوت هجومي"] }
+            es: { 
+                story: "Año 2084. La IA 'Architect' controla el mundo. Tu misión es infiltrarte en su núcleo. Para confundir a su firewall, debes elegir los datos que NO encajan.",
+                goal: "> OBJETIVO: Sabotaje de nodos.",
+                inst: "SABOTAJE: Toca el resultado INCORRECTO.", 
+                start: "CONECTAR NODO", 
+                retry: "REINTENTAR", 
+                over: "CONEXIÓN PERDIDA", 
+                rank: "RANGO FINAL", 
+                mods: "MÓDULOS", 
+                score: "HACKS", 
+                warn_t: "SISTEMA BLOQUEADO", 
+                track: "RASTREO", 
+                ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], 
+                unlock: "¡MÓDULO RECUPERADO!", 
+                install: "INSTALAR", 
+                itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"] 
+            },
+            en: { 
+                story: "Year 2084. 'Architect' AI rules the world. Your mission: infiltrate its core. To bypass the firewall, select the data that DOES NOT fit.",
+                goal: "> MISSION: Node Sabotage.",
+                inst: "SABOTAGE: Tap the INCORRECT result.", 
+                start: "CONNECT NODE", 
+                retry: "RETRY ACCESS", 
+                over: "CONNECTION LOST", 
+                rank: "FINAL RANK", 
+                mods: "MODULES", 
+                score: "HACKS", 
+                warn_t: "SYSTEM LOCKED", 
+                track: "TRACKING", 
+                ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], 
+                unlock: "MODULE RECOVERED!", 
+                install: "INSTALL", 
+                itemNames: ["ENERGY CORE", "FIRE CODE", "FIREWALL ALPHA", "SAT RECEIVER", "IA CORTEX", "ASSAULT BOT"] 
+            },
+            ca: { story: "Any 2084. La IA 'Architect' controla el món. La teva missió és infiltrar-te en el seu nucli. Per confondre el firewall, has de triar les dades que NO encaixen.", goal: "> OBJECTIU: Sabotatge de nodes.", inst: "SABOTATGE: Toca el resultat INCORRECTE.", start: "CONNECTAR NODE", retry: "REINTENTAR", over: "CONNEXIÓ PERDUDA", rank: "RANG FINAL", mods: "MÒDULS", score: "HACKS", warn_t: "SISTEMA BLOQUEJAT", track: "RASTREIG", ranks: ["NOVATELL", "HACKER", "MESTRE", "ARCHITECT"], unlock: "MÒDUL RECUPERAT!", install: "INSTAL·LAR", itemNames: ["NUCLI ENERGIA", "CODI IGNIS", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT D'ASSALT"] },
+            pt: { story: "Ano 2084. A IA 'Architect' controla o mundo. Sua missão é infiltrar-se em seu núcleo. Para confundir o firewall, escolha os dados que NÃO se encaixam.", goal: "> OBJETIVO: Sabotagem de nós.", inst: "SABOTAGEM: Toque no resultado INCORRETO.", start: "CONECTAR NÓ", retry: "REENTRAR", over: "CONEXÃO PERDIDA", rank: "CLASSIFICAÇÃO", mods: "MÓDULOS", score: "HACKS", warn_t: "SISTEMA BLOQUEADO", track: "RASTREAMENTO", ranks: ["NOVATO", "HACKER", "MESTRE", "ARCHITECT"], unlock: "MÓDULO RECUPE!", install: "INSTALAR", itemNames: ["NÚCLEO ENERGIA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"] },
+            fr: { story: "Année 2084. L'IA 'Architect' domine le monde. Votre mission est d'infiltrer son noyau. Pour tromper le pare-feu, choisissez les données qui ne correspondent PAS.", goal: "> OBJECTIF : Sabotage de nœuds.", inst: "SABOTAGE: Touchez le résultat INCORRECT.", start: "CONNECTER NOEUD", retry: "RÉESSAYER", over: "CONNEXION PERDUE", rank: "RANG FINAL", mods: "MODULES", score: "HACKS", warn_t: "SYSTÈME BLOQUÉ", track: "TRAÇAGE", ranks: ["NOVICE", "HACKER", "MAÎTRE", "ARCHITECT"], unlock: "MODULE RÉCUPÉRÉ!", install: "INSTALLER", itemNames: ["NOYAU ÉNERGIE", "CODE FEU", "PARE-FEU ALPHA", "RECEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"] },
+            de: { story: "Jahr 2084. Die KI 'Architect' beherrscht die Welt. Deine Mission: Infiltriere ihren Kern. Um die Firewall zu umgehen, wähle die Daten aus, die NICHT passen.", goal: "> ZIEL: Sabotage der Knoten.", inst: "SABOTAGE: Tippen Sie auf das FALSCHE Ergebnis.", start: "KNOTEN VERBINDEN", retry: "NEUSTART", over: "VERBINDUNG VERLOREN", rank: "END-RANG", mods: "MODULE", score: "HACKS", warn_t: "SYSTEM GESPERRT", track: "VERFOLGUNG", ranks: ["ANFÄNGER", "HACKER", "MEISTER", "ARCHITECT"], unlock: "MODUL GEFUNDEN!", install: "INSTALLIEREN", itemNames: ["ENERGIEKERN", "FEUER-CODE", "FIREWALL ALPHA", "SAT-EMPFÄNGER", "KI-CORTEX", "ANGRIFFS-BOT"] },
+            zh: { story: "2084年。“建筑师”AI统治着世界。你的任务是渗透它的核心。为了迷惑它的防火墙，你必须选择不匹配的数据。", goal: "> 目标：节点破坏。", inst: "破坏行动：点击错误的结果。", start: "连接节点", retry: "重试", over: "连接中断", rank: "最终等级", mods: "模块", score: "入侵次数", warn_t: "系统已锁定", track: "追踪中", ranks: ["新手", "黑客", "大师", "建筑师"], unlock: "模块已恢复！", install: "安装", itemNames: ["能源核心", "烈火代码", "阿尔法防火墙", "卫星接收器", "皮层AI", "突击机器人"] },
+            hi: { story: "वर्ष 2084. 'आर्किटेक्ट' एआई दुनिया पर राज करती है। आपका मिशन: इसके मूल में घुसपैठ करना। फ़ायरवॉल को चकमा देने के लिए, वह डेटा चुनें जो मेल नहीं खाता।", goal: "> लक्ष्य: नोड तोड़फोड़।", inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", start: "नोड कनेक्ट करें", retry: "पुनः प्रयास करें", over: "कनेक्शन टूटा", rank: "अंतिम रैंक", mods: "मॉड्यूल", score: "हैक्स", warn_t: "सिस्टम लॉक", track: "ट्रैकिंग", ranks: ["नौसिखिया", "हैकर", "मास्टर", "आर्किटेक्ट"], unlock: "मॉड्यूल बरामद!", install: "स्थापित", itemNames: ["ऊर्जा कोर", "अग्नि कोड", "फ़ायरवॉल अल्फा", "सैट रिसीver", "एआई कॉर्टेक्स", "असॉल्ट बॉट"] },
+            ar: { story: "عام 2084. الذكاء الاصطناعي 'المهندس' يحكم العالم. مهمتك هي اختراق جوهره. لتضليل جدار الحماية، يجب عليك اختيار البيانات التي لا تتطابق.", goal: "> الهدف: تخريب العقد.", inst: "تخريب: اضغط على النتيجة الخاطئة.", start: "توصيل العقدة", retry: "إعادة المحاولة", over: "فقد الاتصال", rank: "الرتبة النهائية", mods: "وحدات", score: "اختراقات", warn_t: "النظام مغلق", track: "تتبع", ranks: ["مبتدئ", "مخترق", "سيد", "المهندس"], unlock: "تم استرداد الوحدة!", install: "تثبيت", itemNames: ["نواة الطاقة", "كود النار", "جدار حماية ألفa", "مستقبل سات", "ذكاء كورتيكس", "روبوت هجومي"] }
         };
 
         let currentLang = 'es', score = 0, alertLevel = 0, timer, isChecking = false;
@@ -190,6 +231,8 @@
         function setLang(l) {
             currentLang = l;
             const t = i18n[l];
+            document.getElementById('t-story-body').innerText = t.story;
+            document.getElementById('t-goal').innerText = t.goal;
             document.getElementById('t-instruction').innerText = t.inst;
             document.getElementById('t-start-btn').innerText = t.start;
             document.getElementById('t-retry-btn').innerText = t.retry;
@@ -313,7 +356,6 @@
             const key = `${currentN1}x${currentN2}`;
             masteredErrors[key] = {n1: currentN1, n2: currentN2, weight: 3};
 
-            // MODIFICACIÓN: Ahora se muestra el resultado correcto (res) en la fórmula
             document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ${res}`;
             document.getElementById('error-screen').style.display = 'flex';
             document.getElementById('repair-input').focus();
