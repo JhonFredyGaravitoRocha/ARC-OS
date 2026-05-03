@@ -37,14 +37,24 @@
         }
         
         #house-display { font-size: 4rem; z-index: 5; transition: transform 0.3s; }
+
+        /* Pantallas Especiales */
+        .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
         
-        .overlay-msg { 
-            position: absolute; inset: 0; display: none; 
-            flex-direction: column; align-items: center; 
-            justify-content: center; z-index: 50; padding: 10px;
-            font-weight: bold;
+        #unlock-screen {
+            display: none;
+            background: radial-gradient(circle, rgba(0,212,255,0.2) 0%, rgba(5,10,20,1) 70%);
+            z-index: 300;
         }
-        #success-msg { background: var(--neon-blue); color: #000; }
+
+        .unlock-anim {
+            font-size: 6rem;
+            margin: 20px;
+            animation: pulse 1s infinite alternate;
+            filter: drop-shadow(0 0 20px var(--neon-blue));
+        }
+
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
 
         #error-screen {
             background: rgba(150, 0, 0, 0.95);
@@ -73,7 +83,6 @@
 
         .correct-sabotage { background: #064e3b !important; border-color: var(--hacker-green) !important; color: white; }
         
-        .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
         .action-btn { padding: 15px 40px; background: var(--hacker-green); color: black; font-weight: bold; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 0 15px var(--hacker-green); margin-top: 20px; text-transform: uppercase; }
         
         .stat-box { margin: 15px 0; color: white; border: 1px solid #1e293b; padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.05); width: 250px; }
@@ -82,39 +91,28 @@
         .item { width: 35px; height: 35px; background: #1e293b; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0.2; filter: grayscale(1); }
         .item.unlocked { opacity: 1; filter: grayscale(0); border: 1px solid var(--hacker-green); box-shadow: 0 0 5px var(--hacker-green); }
 
-        .kofi-button {
-            margin-top: 25px;
-            display: inline-block;
-            background: var(--kofi-color);
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border: 1px solid white;
-            transition: 0.3s;
-            box-shadow: 0 0 10px rgba(41, 171, 224, 0.4);
-        }
-
+        .kofi-button { margin-top: 25px; display: inline-block; background: var(--kofi-color); color: white; text-decoration: none; padding: 10px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; border: 1px solid white; transition: 0.3s; }
+        .credits { font-size: 0.7rem; color: #4b5563; margin-top: 25px; letter-spacing: 1px; }
         .lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; width: 100%; max-width: 350px; }
         .lang-btn { background: #111827; border: 1px solid var(--hacker-green); color: white; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
-        .lang-btn:hover { background: var(--hacker-green); color: black; }
-
-        .credits { font-size: 0.7rem; color: #4b5563; margin-top: 25px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <canvas id="code-bg"></canvas>
 
-    <!-- PANTALLA DE ERROR FULLSCREEN -->
+    <!-- PANTALLA DE DESBLOQUEO (NUEVA) -->
+    <div id="unlock-screen" class="overlay-screen">
+        <h1 id="t-unlock-title" style="color: var(--neon-blue); margin: 0;">¡MÓDULO RECUPERADO!</h1>
+        <div id="unlock-icon" class="unlock-anim">🔋</div>
+        <h2 id="unlock-name" style="color: white; margin: 0;">BATERÍA DE PLASMA</h2>
+        <button class="action-btn" onclick="closeUnlock()" style="background: var(--neon-blue);">INSTALAR</button>
+    </div>
+
     <div id="error-screen">
-        <h2 id="t-warn-title" style="font-size: 2rem; color: white; margin-bottom: 10px;"></h2>
-        <p id="t-warn-desc" style="font-size: 1.2rem; opacity: 0.8;"></p>
-        <div id="correct-answer-display" style="font-size: 3.5rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,0,0,0.5); white-space: nowrap;">0 × 0 = 0</div>
-        <p id="t-continue-msg" style="font-size: 0.8rem; margin-bottom: 20px;"></p>
-        <button class="action-btn" onclick="resumeGame()" style="background: white; color: red; box-shadow: 0 0 15px white;">CONTINUAR</button>
+        <h2 id="t-warn-title" style="font-size: 2rem; color: white;"></h2>
+        <div id="correct-answer-display" style="font-size: 3.5rem; font-weight: 900; margin: 20px 0;">0 × 0 = 0</div>
+        <button class="action-btn" onclick="resumeGame()" style="background: white; color: red;">CONTINUAR</button>
     </div>
 
     <div id="lang-screen" class="overlay-screen">
@@ -122,49 +120,31 @@
         <div class="lang-grid">
             <button class="lang-btn" onclick="setLang('es')">Español</button>
             <button class="lang-btn" onclick="setLang('en')">English</button>
-            <button class="lang-btn" onclick="setLang('ca')">Català</button>
-            <button class="lang-btn" onclick="setLang('fr')">Français</button>
-            <button class="lang-btn" onclick="setLang('de')">Deutsch</button>
-            <button class="lang-btn" onclick="setLang('pt')">Português</button>
-            <button class="lang-btn" onclick="setLang('zh')">中文</button>
-            <button class="lang-btn" onclick="setLang('ja')">日本語</button>
-            <button class="lang-btn" onclick="setLang('ru')">Русский</button>
-            <button class="lang-btn" onclick="setLang('ar')">العربية</button>
-            <button class="lang-btn" onclick="setLang('hi')">हिन्दी</button>
         </div>
-        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <div id="start-screen" class="overlay-screen" style="display: none;">
         <h1 style="color: var(--hacker-green); letter-spacing: 4px;">ARCHITECT OS</h1>
-        <p id="t-instruction" style="max-width: 300px; line-height: 1.5;"></p>
+        <p id="t-instruction"></p>
         <button id="t-start-btn" class="action-btn" onclick="startGame()"></button>
-        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <div id="end-screen" class="overlay-screen" style="display: none;">
         <h1 id="t-gameover" style="color: var(--alert);"></h1>
         <div class="stat-box">
-            <div id="t-final-rank-label" style="font-size: 0.8rem; color: #64748b;"></div>
-            <div id="final-rank" style="font-size: 1.5rem; font-weight: bold; margin: 5px 0;">-</div>
-            <hr style="border: 0; border-top: 1px solid #1e293b; margin: 10px 0;">
-            <div id="t-mods-label" style="font-size: 0.8rem; color: #64748b;"></div>
+            <div id="t-final-rank-label"></div>
+            <div id="final-rank">-</div>
+            <hr style="border:0; border-top:1px solid #1e293b; margin:10px 0;">
+            <div id="t-mods-label"></div>
             <div id="collection">
                 <div class="item">🔋</div><div class="item">🔥</div><div class="item">🛡️</div>
                 <div class="item">📡</div><div class="item">🧠</div><div class="item">🔫</div>
             </div>
-            <hr style="border: 0; border-top: 1px solid #1e293b; margin: 10px 0;">
-            <div id="t-score-label" style="font-size: 0.8rem; color: #64748b;"></div>
-            <div id="final-score" style="font-size: 2rem; color: var(--hacker-green);">0</div>
+            <hr style="border:0; border-top:1px solid #1e293b; margin:10px 0;">
+            <div id="t-score-label"></div>
+            <div id="final-score">0</div>
         </div>
-        
         <button id="t-retry-btn" class="action-btn" onclick="location.reload()"></button>
-
-        <a href="https://ko-fi.com/cesioaraya1" target="_blank" class="kofi-button">
-            ☕ <span id="t-kofi">Apoyar el proyecto</span>
-        </a>
-
-        <div class="credits">By CESIO and AGUACATINI49</div>
     </div>
 
     <div id="game">
@@ -174,10 +154,6 @@
         </div>
         <div id="construction-area">
             <div id="house-display">🛰️</div>
-            <div id="success-msg" class="overlay-msg">
-                <span id="t-success-title" style="font-size: 1.5rem;"></span>
-                <p id="t-success-desc"></p>
-            </div>
         </div>
         <div id="timer-bar"><div id="timer-fill"></div></div>
         <div id="prob">? x ?</div>
@@ -191,16 +167,28 @@
 
     <script>
         const i18n = {
-            es: { kofi: "Invítame un café", inst: "Sabotea el sistema: Toca el resultado INCORRECTO.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS RECUPERADOS", score: "HACKS EXITOSOS", warn_t: "⚠️ DETECTADO ⚠️", warn_d: "CÁLCULO CORRECTO:", succ_t: "✅ LIMPIEZA ✅", succ_d: "NODO ASEGURADO", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], cont: "PULSA PARA RE-SINCRONIZAR" },
-            en: { kofi: "Buy me a coffee", inst: "Sabotage the system: Tap the INCORRECT result.", start: "Connect Node", retry: "Retry Access", over: "CONNECTION INTERCEPTED", rank: "FINAL RANK", mods: "RECOVERED MODULES", score: "SUCCESSFUL HACKS", warn_t: "⚠️ DETECTED ⚠️", warn_d: "CORRECT CALCULATION:", succ_t: "✅ CLEANSED ✅", succ_d: "NODE SECURED", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], cont: "PRESS TO RE-SYNC" }
+            es: { 
+                inst: "Sabotea el sistema: Toca el resultado INCORRECTO.", start: "Conectar Nodo", retry: "Reintentar Acceso", over: "CONEXIÓN INTERCEPTADA", rank: "RANGO FINAL", mods: "MÓDULOS", score: "HACKS", warn_t: "⚠️ DETECTADO ⚠️", track: "RASTREO", ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"],
+                unlock: "¡MÓDULO RECUPERADO!",
+                itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"]
+            },
+            en: { 
+                inst: "Sabotage the system: Tap the INCORRECT result.", start: "Connect Node", retry: "Retry Access", over: "INTERCEPTED", rank: "FINAL RANK", mods: "MODULES", score: "HACKS", warn_t: "⚠️ DETECTED ⚠️", track: "TRACKING", ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"],
+                unlock: "MODULE RECOVERED!",
+                itemNames: ["ENERGY CORE", "FIRE CODE", "FIREWALL ALPHA", "SAT RECEIVER", "IA CORTEX", "ASSAULT BOT"]
+            }
         };
 
         let currentLang = 'es';
-        let currentN1, currentN2, res;
+        let score = 0, alertLevel = 0, timer, isChecking = false;
+        const stages = ["🛰️", "📡", "🚀", "🛸", "👾", "☄️", "🌌", "👑"];
+        const itemIcons = ["🔋", "🔥", "🛡️", "📡", "🧠", "🔫"];
+        const collectThresholds = [10, 20, 30, 40, 50, 60];
+        let unlockedItems = JSON.parse(localStorage.getItem('arch_items')) || [0,0,0,0,0,0];
 
         function setLang(l) {
             currentLang = l;
-            const t = i18n[l] || i18n['en'];
+            const t = i18n[l];
             document.getElementById('t-instruction').innerText = t.inst;
             document.getElementById('t-start-btn').innerText = t.start;
             document.getElementById('t-retry-btn').innerText = t.retry;
@@ -209,41 +197,16 @@
             document.getElementById('t-mods-label').innerText = t.mods;
             document.getElementById('t-score-label').innerText = t.score;
             document.getElementById('t-warn-title').innerText = t.warn_t;
-            document.getElementById('t-warn-desc').innerText = t.warn_d;
-            document.getElementById('t-success-title').innerText = t.succ_t;
-            document.getElementById('t-success-desc').innerText = t.succ_d;
-            document.getElementById('t-continue-msg').innerText = t.cont;
-            if(t.kofi) document.getElementById('t-kofi').innerText = t.kofi;
+            document.getElementById('t-unlock-title').innerText = t.unlock;
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
         }
-
-        const canvas = document.getElementById('code-bg');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const drops = Array(Math.floor(canvas.width / 16)).fill(1);
-        function drawMatrix() {
-            ctx.fillStyle = "rgba(5, 10, 20, 0.15)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#00ff41"; ctx.font = "16px monospace";
-            drops.forEach((y, i) => {
-                ctx.fillText(Math.floor(Math.random()*2), i * 16, y * 16);
-                if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-        setInterval(drawMatrix, 50);
-
-        let score = 0, alertLevel = 0, timer, isChecking = false;
-        const stages = ["🛰️", "📡", "🚀", "🛸", "👾", "☄️", "🌌", "👑"];
-        const collectThresholds = [10, 20, 30, 40, 50, 60];
-        let unlockedItems = JSON.parse(localStorage.getItem('arch_items')) || [0,0,0,0,0,0];
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(freq, type, duration, vol = 0.1) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
             osc.connect(gain); gain.connect(audioCtx.destination);
@@ -258,23 +221,62 @@
             gen();
         }
 
-        function updateRank() {
-            const t = i18n[currentLang] || i18n['en'];
-            const rankNames = t.ranks;
-            let rankIdx = 0;
-            if(score >= 50) rankIdx = 3;
-            else if(score >= 30) rankIdx = 2;
-            else if(score >= 15) rankIdx = 1;
-            const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
-            document.getElementById('rank-display').innerText = "NV." + (rankIdx+1) + " " + rankNames[rankIdx];
-            document.getElementById('rank-display').style.color = colors[rankIdx];
-            document.documentElement.style.setProperty('--rank-color', colors[rankIdx]);
-            return "NV." + (rankIdx+1) + " " + rankNames[rankIdx];
+        function check(idx) {
+            if(isChecking) return;
+            isChecking = true;
+            clearInterval(timer);
+            let btns = document.querySelectorAll('.btn');
+            
+            if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
+                score++;
+                playSound(800 + (score * 10), 'square', 0.1);
+                
+                // Verificar desbloqueo de objeto
+                let itemIdx = collectThresholds.indexOf(score);
+                if(itemIdx !== -1) {
+                    showUnlock(itemIdx);
+                } else {
+                    btns[idx].classList.add('correct-sabotage');
+                    document.getElementById('phase').innerText = score.toString().padStart(2, '0');
+                    document.getElementById('house-display').innerText = stages[Math.min(Math.floor(score/7), stages.length-1)];
+                    setTimeout(gen, 300);
+                }
+            } else {
+                handleError();
+            }
+        }
+
+        function showUnlock(idx) {
+            unlockedItems[idx] = 1;
+            localStorage.setItem('arch_items', JSON.stringify(unlockedItems));
+            
+            // Sonido Épico
+            playSound(440, 'sine', 0.2, 0.2);
+            setTimeout(() => playSound(554, 'sine', 0.2, 0.2), 150);
+            setTimeout(() => playSound(659, 'sine', 0.4, 0.2), 300);
+
+            document.getElementById('unlock-icon').innerText = itemIcons[idx];
+            document.getElementById('unlock-name').innerText = i18n[currentLang].itemNames[idx];
+            document.getElementById('unlock-screen').style.display = 'flex';
+        }
+
+        function closeUnlock() {
+            document.getElementById('unlock-screen').style.display = 'none';
+            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
+            gen();
+        }
+
+        function handleError() {
+            alertLevel++;
+            playSound(80, 'sawtooth', 0.6, 0.2);
+            updateAlertUI();
+            document.getElementById('correct-answer-display').innerText = `${currentN1} × ${currentN2} = ${res}`;
+            document.getElementById('error-screen').style.display = 'flex';
+            if (alertLevel >= 3) setTimeout(gameOver, 2000);
         }
 
         function gen() {
             isChecking = false;
-            document.getElementById('success-msg').style.display = 'none';
             document.getElementById('error-screen').style.display = 'none';
             updateRank();
             let maxRange = score < 10 ? 5 : 10;
@@ -289,8 +291,7 @@
                 b.classList.remove('correct-sabotage');
                 if (i === realPos) b.innerText = res;
                 else {
-                    let offset = (Math.floor(Math.random() * 3) + 1) * (Math.random() > 0.5 ? 1 : -1);
-                    let fake = res + offset;
+                    let fake = res + (Math.floor(Math.random() * 3) + 1) * (Math.random() > 0.5 ? 1 : -1);
                     if (fake <= 0 || fake === res) fake = res + 5;
                     b.innerText = fake;
                 }
@@ -309,69 +310,49 @@
             }, 100);
         }
 
-        function check(idx) {
-            if(isChecking) return;
-            isChecking = true;
-            clearInterval(timer);
-            let btns = document.querySelectorAll('.btn');
-            
-            if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
-                score++;
-                collectThresholds.forEach((t, i) => {
-                    if(score === t) {
-                        unlockedItems[i] = 1;
-                        localStorage.setItem('arch_items', JSON.stringify(unlockedItems));
-                        playSound(1200, 'sine', 0.5, 0.2);
-                    }
-                });
-                playSound(800 + (Math.min(score, 40) * 10), 'square', 0.1);
-                btns[idx].classList.add('correct-sabotage');
-                document.getElementById('phase').innerText = score.toString().padStart(2, '0');
-                document.getElementById('house-display').innerText = stages[Math.min(Math.floor(score/7), stages.length-1)];
-                if (score > 0 && score % 15 === 0) levelUp();
-                else setTimeout(gen, 300);
-            } 
-            else {
-                alertLevel++;
-                playSound(80, 'sawtooth', 0.6, 0.2);
-                updateAlertUI();
-                document.getElementById('correct-answer-display').innerText = `${currentN1} × ${currentN2} = ${res}`;
-                document.getElementById('error-screen').style.display = 'flex';
-                if (alertLevel >= 3) {
-                    setTimeout(gameOver, 3000);
-                }
-            }
-        }
-
-        function resumeGame() {
-            if(alertLevel < 3) gen();
-        }
-
-        function levelUp() {
-            playSound(523, 'sine', 0.2);
-            setTimeout(() => playSound(783, 'sine', 0.4), 300);
-            document.getElementById('success-msg').style.display = 'flex';
-            alertLevel = Math.max(0, alertLevel - 1);
-            updateAlertUI();
-            setTimeout(gen, 1500);
+        function updateRank() {
+            const t = i18n[currentLang];
+            let rankIdx = score >= 50 ? 3 : score >= 30 ? 2 : score >= 15 ? 1 : 0;
+            const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
+            document.getElementById('rank-display').innerText = "NV." + (rankIdx+1) + " " + t.ranks[rankIdx];
+            document.getElementById('rank-display').style.color = colors[rankIdx];
+            document.documentElement.style.setProperty('--rank-color', colors[rankIdx]);
         }
 
         function updateAlertUI() {
-            const t = i18n[currentLang] || i18n['en'];
+            const t = i18n[currentLang];
             let dots = "";
             for(let i=0; i<3; i++) dots += i < alertLevel ? "[X] " : "[ ] ";
             document.getElementById('error-dots').innerText = t.track + ": " + dots;
         }
+
+        function resumeGame() { if(alertLevel < 3) gen(); }
 
         function gameOver() {
             document.getElementById('error-screen').style.display = 'none';
             document.getElementById('game').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
             document.getElementById('final-score').innerText = score;
-            document.getElementById('final-rank').innerText = updateRank();
+            document.getElementById('final-rank').innerText = document.getElementById('rank-display').innerText;
             const items = document.querySelectorAll('.item');
             unlockedItems.forEach((u, i) => { if(u) items[i].classList.add('unlocked'); });
         }
+
+        // Matrix Background
+        const canvas = document.getElementById('code-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const drops = Array(Math.floor(canvas.width / 16)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(5, 10, 20, 0.15)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ff41"; ctx.font = "16px monospace";
+            drops.forEach((y, i) => {
+                ctx.fillText(Math.floor(Math.random()*2), i * 16, y * 16);
+                if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(drawMatrix, 50);
     </script>
 </body>
 </html>
