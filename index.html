@@ -184,6 +184,7 @@
     </div>
 
     <script>
+        let errorHistory = []; // Almacena los 3 fallos que terminan la partida
         const i18n = {
             es: { 
                 story: "Año 2084. La IA 'Architect' controla el mundo. Tu misión es infiltrarte en su núcleo. Para confundir a su firewall, debes elegir los datos que NO encajan.",
@@ -345,18 +346,20 @@
         function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
+    
+            // REGISTRO DEL ERROR
+            errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
+    
             alertLevel++;
             playSound(80, 'sawtooth', 0.4);
             updateAlertUI();
-            
+    
             document.getElementById('repair-story').innerText = i18n[currentLang].repair_txt;
-            // AHORA MUESTRA LA RESPUESTA PARA RECUPERAR VIDA
             document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ${res}`;
             document.getElementById('error-screen').style.display = 'flex';
             document.getElementById('repair-input').value = "";
             document.getElementById('repair-input').focus();
 
-            // TEMPORIZADOR DE REPARACIÓN (5 SEGUNDOS)
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
@@ -446,23 +449,53 @@
             document.getElementById('game').style.display = 'none';
             document.getElementById('error-screen').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
-    
+
             // 1. Mostrar total de Hacks
             document.getElementById('final-score').innerText = score;
-    
+
             // 2. Mostrar Rango Final alcanzado
             document.getElementById('final-rank').innerText = i18n[currentLang].ranks[lastRank];
-    
+
             // 3. Generar resumen de objetos recuperados
             const collectionContainer = document.getElementById('collection-end');
             collectionContainer.innerHTML = ''; // Limpiar previo
-    
+
             unlockedItems.forEach((isUnlocked, idx) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = isUnlocked ? 'item unlocked' : 'item';
                 itemDiv.innerText = itemIcons[idx];
                 collectionContainer.appendChild(itemDiv);
             });
+
+            // 4. NUEVO: Resumen de Errores que causaron la desconexión
+            const statBox = document.querySelector('.stat-box');
+    
+            // Eliminar log previo si existe (para reintentos sin recargar página)
+            const oldLog = statBox.querySelector('.error-summary-log');
+            if(oldLog) oldLog.remove();
+
+            const errorLog = document.createElement('div');
+            errorLog.className = "error-summary-log";
+            errorLog.style.marginTop = "15px";
+            errorLog.style.fontSize = "0.7rem";
+            errorLog.style.textAlign = "left";
+            errorLog.style.color = "var(--alert)";
+            errorLog.style.borderTop = "1px solid #1e293b";
+            errorLog.style.paddingTop = "10px";
+    
+            let errorHTML = `<div style="color: #666; margin-bottom: 5px; font-weight: bold;">> LOG DE FALLOS CRÍTICOS:</div>`;
+    
+            // Solo mostrar si hubo errores registrados
+            if (errorHistory.length > 0) {
+                errorHistory.forEach((err, i) => {
+                    errorHTML += `<div style="margin-bottom: 2px; font-family: monospace;">[SABOTAJE_FALLIDO_0${i+1}]: ${err}</div>`;
+                });
+            } else {
+                errorHTML += `<div>NO SE DETECTARON BRECHAS.</div>`;
+            }
+    
+            errorLog.innerHTML = errorHTML;
+            statBox.appendChild(errorLog);
         }
 
         const canvas = document.getElementById('code-bg');
