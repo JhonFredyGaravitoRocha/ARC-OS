@@ -458,9 +458,16 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       
         function setLang(l) {
-            playKeySound(); // Activa el audio en el primer clic[cite: 3]
-            currentLang = i18n[l] ? l : 'es';[cite: 3]
+            playKeySound(); // Activamos audio en el primer clic[cite: 3]
+            currentLang = i18n[l] ? l : 'es'; 
             const t = i18n[currentLang];
+            
+            // ... (actualización de textos omitida por brevedad) ...
+        
+            // Gestión de visibilidad[cite: 3]
+            document.getElementById('lang-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
             
             // Actualización de textos
             document.getElementById('t-story-body').innerText = t.story;
@@ -482,7 +489,11 @@
         }
         
         function playKeySound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            // Si el audio está suspendido (bloqueo del navegador), lo activamos
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
             let frequency = 400 + (combo * 100); 
             frequency = Math.min(frequency, 2000); 
             playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
@@ -519,28 +530,17 @@
         }
 
         function startGame() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (audioCtx.state === 'suspended') audioCtx.resume(); // Doble verificación[cite: 3]
+            
+            // Ocultar inicio y mostrar juego
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            // Reiniciar valores por seguridad
+            // Reset de variables críticas
             score = 0;
             combo = 0;
             repairsLeft = 3;
-            
-            // Configurar el input de reparación una sola vez
-            const repairInp = document.getElementById('repair-input');
-            repairInp.oninput = (e) => {
-                const val = parseInt(e.target.value);
-                if(val === res) {
-                    clearInterval(repairTimer);
-                    repairsLeft--;
-                    playSound(1000, 'sine', 0.2);
-                    document.getElementById('error-screen').style.display = 'none';
-                    updateAlertUI();
-                    gen();
-                }
-            };
+            errorHistory = []; 
             
             updateAlertUI();
             gen(); 
