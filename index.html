@@ -261,6 +261,7 @@
         };
 
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
+        let repairsLeft = 3;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
         let unlockedItems = [0,0,0,0,0,0,0,0,0,0,0,0]; 
         const itemIcons = ["🔋", "🔥", "🛡️", "📡", "🧠", "🔫", "💎", "🚀", "🛸", "👾", "👑", "⭐"];
@@ -329,23 +330,22 @@
             // Listener para la pantalla de reparación (dentro de startGame)
             const repairInp = document.getElementById('repair-input');
             repairInp.oninput = (e) => {
-                if(parseInt(e.target.value) === res) {
+                // Verificamos si el resultado es correcto Y si aún tiene intentos de recuperación
+                if(parseInt(e.target.value) === res && repairsLeft > 0) {
                     clearInterval(repairTimer);
+                    
+                    repairsLeft--; // Restamos una vida de recuperación
                     alertLevel--; 
                     errorHistory.pop();
-                    combo = 0; 
-                    document.getElementById('combo-tag').style.opacity = 0; 
-                    document.getElementById('game').classList.remove('overclock-active'); 
-                    updateAlertUI();
-                    const hackerAlert = document.getElementById('post-repair-msg');
-                    hackerAlert.style.display = 'block';
-                    playSound(1000, 'sine', 0.2, 0.3);
-                    setTimeout(() => {
-                        e.target.value = "";
-                        hackerAlert.style.display = 'none';
-                        document.getElementById('error-screen').style.display = 'none';
-                        gen(); 
-                    }, 800);
+                    
+                    // Actualizar UI de la pantalla de error (opcional)
+                    document.getElementById('repair-msg').innerText = `REPARACIONES RESTANTES: ${repairsLeft}`;[cite: 2]
+                    
+                    // ... resto de tu código de éxito (combo = 0, playSound, etc.)
+                } else if (parseInt(e.target.value) === res && repairsLeft <= 0) {
+                    // Si el resultado es correcto pero ya no hay vidas, forzamos el fin
+                    clearInterval(repairTimer);
+                    gameOver();[cite: 2]
                 }
             };
             gen(); 
@@ -389,35 +389,56 @@
             gen();
         }
 
-        function handleError() {
+                function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
-    
+        
             // REGISTRO DEL ERROR
             errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
-    
+        
             alertLevel++;
             playSound(80, 'sawtooth', 0.4);
             updateAlertUI();
-    
-            document.getElementById('repair-story').innerText = i18n[currentLang].repair_txt;
-            document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ${res}`;
+        
+            // Mostramos la pantalla de error
             document.getElementById('error-screen').style.display = 'flex';
-            document.getElementById('repair-input').value = "";
-            document.getElementById('repair-input').focus();
-
+            document.getElementById('repair-story').innerText = i18n[currentLang].repair_txt;
+            document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
+        
+            // LÓGICA DE LÍMITE DE REPARACIONES
+            const repairInp = document.getElementById('repair-input');
+            const repairMsg = document.getElementById('repair-msg');
+        
+            if (repairsLeft > 0) {
+                // Si aún tiene reparaciones, habilitamos el input y mostramos el conteo
+                repairMsg.innerText = `REPARACIONES DISPONIBLES: ${repairsLeft}`;[cite: 2]
+                repairInp.style.display = "block";[cite: 2]
+                repairInp.value = "";
+                repairInp.focus();
+            } else {
+                // Si no quedan, notificamos que el fallo es crítico y ocultamos el input
+                repairMsg.innerText = "ERROR CRÍTICO: SIN REPARACIONES RESTANTES";[cite: 2]
+                repairInp.style.display = "none";[cite: 2]
+            }
+        
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
+            
             repairTimer = setInterval(() => {
-                // Restando 2.5 cada 100ms, la barra se vacía en 4 segundos exactos
                 repairTimeLeft -= 2.5; 
                 fill.style.width = repairTimeLeft + "%";
+                
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
                     document.getElementById('error-screen').style.display = 'none';
-                    // Si se acaba el tiempo y acumuló 3 fallos, Game Over[cite: 1]
-                    if (alertLevel >= 3) gameOver(); else gen(); 
+                    
+                    // Si se acaba el tiempo, termina el juego si acumuló 3 fallos O si ya no tiene reparaciones
+                    if (alertLevel >= 3 || repairsLeft <= 0) { 
+                        gameOver(); 
+                    } else { 
+                        gen(); 
+                    }
                 }
             }, 100);
         }
