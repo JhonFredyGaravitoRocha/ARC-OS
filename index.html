@@ -418,11 +418,8 @@
             isChecking = false;
             updateRank();
             
-            function gen() {
-            isChecking = false;
-            updateRank();
-            
-            // Forzamos el rango estrictamente del 2 al 9
+            // RANGO ESTRICTO: 2 a 9
+            // Math.random() * 8 genera 0-7.99 -> floor da 0-7 -> + 2 da 2-9
             let nA = Math.floor(Math.random() * 8) + 2; 
             let nB = Math.floor(Math.random() * 8) + 2;
             
@@ -437,7 +434,8 @@
             const grid = document.getElementById('visual-grid');
             grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
             grid.innerHTML = '';
-            const totalDots = Math.min(currentN1 * currentN2, 100); // Límite visual para no romper el layout
+            // Máximo de puntos visuales para no romper la interfaz
+            const totalDots = Math.min(currentN1 * currentN2, 100); 
             for(let i=0; i < totalDots; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'dot';
@@ -445,13 +443,19 @@
             }
 
             let btns = document.querySelectorAll('.btn');
+            // Opciones inteligentes: el error es sumar/restar un factor o variar un poco el resultado
             let options = [
                 res, 
                 res + (Math.random() > 0.5 ? currentN1 : -currentN1),
-                res + (Math.random() > 0.5 ? currentN2 : (res > 10 ? -10 : 10))
-            ].sort(() => Math.random() - 0.5);
+                res + (Math.random() > 0.5 ? currentN2 : (res > 10 ? -5 : 5))
+            ];
 
-            btns.forEach((b, i) => b.innerText = options[i]);
+            // Mezclar opciones y asignar a botones
+            options.sort(() => Math.random() - 0.5);
+            btns.forEach((b, i) => {
+                b.innerText = options[i];
+            });
+
             startTimer();
         }
         
