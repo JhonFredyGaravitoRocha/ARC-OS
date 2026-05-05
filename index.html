@@ -456,6 +456,7 @@
             }, 100);
         }
         
+        
         function gen() {
             isChecking = false;
             updateRank();
@@ -471,14 +472,12 @@
                 grid.style.display = 'grid';
                 fracCont.style.display = 'none';
                 
-                // 1. Definir factores y calcular resultado exacto
                 let nA = Math.floor(Math.random() * 8) + 2; 
                 let nB = Math.floor(Math.random() * 8) + 2;
                 currentN1 = Math.min(nA, nB);
                 currentN2 = Math.max(nA, nB);
                 res = currentN1 * currentN2;
         
-                // 2. Actualizar visualización
                 probDisp.innerText = `${currentN1} × ${currentN2}`;
                 grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
                 grid.innerHTML = '';
@@ -490,32 +489,27 @@
                     grid.appendChild(dot);
                 }
         
-                // 3. Generar opciones únicas
                 let options = [res, res + currentN1, res - currentN2];
-                options = [...new Set(options)]; // Evita duplicados si res-N2 es igual a res
+                options = [...new Set(options)];
                 while(options.length < 3) options.push(res + 5);
         
                 options.sort(() => Math.random() - 0.5);
                 btns.forEach((b, i) => b.innerText = options[i]);
         
             } 
-            // FASE 2: FRACCIONES MIXTAS (Tras ganar el 6º objeto / 60+ Hacks)[cite: 4]
+            // FASE 2: FRACCIONES MIXTAS (Tras ganar el 6º objeto / 60+ Hacks)
             else {
                 grid.style.display = 'none';
                 fracCont.style.display = 'flex';
                 fracCont.innerHTML = '';
         
-                // 1. Lógica mixta: (Entero * Denominador) + Numerador[cite: 4]
                 const whole = Math.floor(Math.random() * 2) + 1; 
                 const den = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
                 const num = Math.floor(Math.random() * (den - 1)) + 1;
-        
                 res = (whole * den) + num; 
         
-                // 2. Actualizar visualización[cite: 4]
                 probDisp.innerHTML = `${whole}<span>${num}/${den}</span>`;
         
-                // 3. Generar opciones[cite: 4]
                 let options = [res, res + 1, res + 2];
                 options = [...new Set(options)].sort(() => Math.random() - 0.5);
                 while(options.length < 3) options.push(res - 1);
@@ -528,6 +522,18 @@
                     fracCont.appendChild(circle);
                     btns[i].innerText = val; 
                 });
+            }
+        
+            // --- AQUÍ REINTEGRAMOS EL AMBIENTE ---
+            const cTag = document.getElementById('combo-tag');
+            cTag.innerText = `X${combo}`;
+            cTag.style.opacity = combo > 1 ? 1 : 0;
+            
+            // Activar iluminación RGB si hay overclock (combo >= 5)
+            if(combo >= 5) {
+                document.getElementById('game').classList.add('overclock-active');
+            } else {
+                document.getElementById('game').classList.remove('overclock-active');
             }
         
             startTimer();
