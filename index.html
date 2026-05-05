@@ -326,24 +326,20 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            // Listener para la pantalla de reparación
+            // Listener para la pantalla de reparación (dentro de startGame)
             const repairInp = document.getElementById('repair-input');
-            repairInp.addEventListener('input', (e) => {
+            repairInp.oninput = (e) => {
                 if(parseInt(e.target.value) === res) {
                     clearInterval(repairTimer);
-                    
                     alertLevel--; 
                     errorHistory.pop();
                     combo = 0; 
                     document.getElementById('combo-tag').style.opacity = 0; 
                     document.getElementById('game').classList.remove('overclock-active'); 
-                    
                     updateAlertUI();
-
                     const hackerAlert = document.getElementById('post-repair-msg');
                     hackerAlert.style.display = 'block';
                     playSound(1000, 'sine', 0.2, 0.3);
-                    
                     setTimeout(() => {
                         e.target.value = "";
                         hackerAlert.style.display = 'none';
@@ -351,11 +347,9 @@
                         gen(); 
                     }, 800);
                 }
-            });
-
-            gen(); // Iniciar el primer acertijo
-        } // <--- ESTA LLAVE ES LA QUE FALTABA
-
+            };
+            gen(); 
+        }
         function check(idx, event) {
             if(isChecking) return;
             isChecking = true;
