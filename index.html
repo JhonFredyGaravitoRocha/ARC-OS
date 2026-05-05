@@ -327,26 +327,20 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            // Configuración limpia del input de reparación
+            // Listener único para la caja de reparación
             const repairInp = document.getElementById('repair-input');
-            repairInp.oninput = (e) => {
+            repairInp.addEventListener('input', (e) => {
                 const val = parseInt(e.target.value);
-                if(val === res && repairsLeft > 0) {
+                if(val === res) { // Si el usuario acierta la reparación
                     clearInterval(repairTimer);
-                    repairsLeft--; 
-                    alertLevel--; 
-                    errorHistory.pop();
-                    
-                    // Sonido de éxito y regreso al juego
+                    repairsLeft--; // Gasta una vida
                     playSound(1000, 'sine', 0.2);
                     document.getElementById('error-screen').style.display = 'none';
                     updateAlertUI();
-                    gen();
-                } else if (val === res && repairsLeft <= 0) {
-                    clearInterval(repairTimer);
-                    gameOver();
+                    gen(); // Genera nuevo reto y sigue el juego
                 }
-            };
+            });
+            updateAlertUI();
             gen(); 
         }
         function check(idx, event) {
@@ -391,48 +385,36 @@
         function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
-        
-            // Registro del error para el log final
             errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
+            
+            // Si no quedan vidas, fin del juego inmediato
+            if (repairsLeft <= 0) {
+                gameOver();
+                return;
+            }
         
-            alertLevel++;
             playSound(80, 'sawtooth', 0.4);
-            updateAlertUI();
-        
             document.getElementById('error-screen').style.display = 'flex';
             document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
-        
+            
             const repairInp = document.getElementById('repair-input');
-            const repairStory = document.getElementById('repair-story'); // Usamos este ID que sí existe
-        
-            if (repairsLeft > 0) {
-                repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES RESTANTES: ${repairsLeft}</span>`;
-                repairInp.style.display = "block";
-                repairInp.value = "";
-                setTimeout(() => repairInp.focus(), 10);
-            } else {
-                repairStory.innerHTML = `<span style="color:var(--alert)">ERROR CRÍTICO: SIN VIDAS DE EMERGENCIA</span>`;
-                repairInp.style.display = "none";
-            }
+            const repairStory = document.getElementById('repair-story');
+            
+            // Mostrar cuántas vidas le quedan
+            repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES DISPONIBLES: ${repairsLeft}</span>`;
+            repairInp.value = "";
+            setTimeout(() => repairInp.focus(), 50);
         
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 2.5; 
+                repairTimeLeft -= 2; // Velocidad de la barra de error
                 fill.style.width = repairTimeLeft + "%";
-                
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
-                    document.getElementById('error-screen').style.display = 'none';
-                    
-                    // Si el tiempo se agota y ya no hay vidas o llegó al límite de alertas
-                    if (alertLevel >= 3 || repairsLeft <= 0) { 
-                        gameOver(); 
-                    } else { 
-                        gen(); 
-                    }
+                    gameOver(); // Si se acaba el tiempo de reparar, muere[cite: 4]
                 }
             }, 100);
         }
@@ -510,9 +492,12 @@
         }
 
         function updateAlertUI() {
-            let dots = "";
-            for(let i=0; i<3; i++) dots += i < alertLevel ? "● " : "○ ";
-            document.getElementById('error-dots').innerText = "RASTREO: " + dots;
+            let hearts = "";
+            // Dibuja corazones según las vidas restantes[cite: 5]
+            for(let i=0; i<3; i++) {
+                hearts += (i < repairsLeft) ? "💙 " : "🖤 ";
+            }
+            document.getElementById('error-dots').innerText = "SISTEMA: " + hearts;
         }
 
         function showUnlock(idx) {
