@@ -327,25 +327,24 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            // Listener para la pantalla de reparación (dentro de startGame)
+            // Configuración limpia del input de reparación
             const repairInp = document.getElementById('repair-input');
             repairInp.oninput = (e) => {
-                // Verificamos si el resultado es correcto Y si aún tiene intentos de recuperación
-                if(parseInt(e.target.value) === res && repairsLeft > 0) {
+                const val = parseInt(e.target.value);
+                if(val === res && repairsLeft > 0) {
                     clearInterval(repairTimer);
-                    
-                    repairsLeft--; // Restamos una vida de recuperación
+                    repairsLeft--; 
                     alertLevel--; 
                     errorHistory.pop();
                     
-                    // Actualizar UI de la pantalla de error (opcional)
-                    document.getElementById('repair-msg').innerText = `REPARACIONES RESTANTES: ${repairsLeft}`;[cite: 2]
-                    
-                    // ... resto de tu código de éxito (combo = 0, playSound, etc.)
-                } else if (parseInt(e.target.value) === res && repairsLeft <= 0) {
-                    // Si el resultado es correcto pero ya no hay vidas, forzamos el fin
+                    // Sonido de éxito y regreso al juego
+                    playSound(1000, 'sine', 0.2);
+                    document.getElementById('error-screen').style.display = 'none';
+                    updateAlertUI();
+                    gen();
+                } else if (val === res && repairsLeft <= 0) {
                     clearInterval(repairTimer);
-                    gameOver();[cite: 2]
+                    gameOver();
                 }
             };
             gen(); 
@@ -393,26 +392,26 @@
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
         
+            // Registro del error para el log final
             errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
+        
             alertLevel++;
             playSound(80, 'sawtooth', 0.4);
             updateAlertUI();
         
             document.getElementById('error-screen').style.display = 'flex';
-            document.getElementById('repair-story').innerText = i18n[currentLang].repair_txt;
             document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
         
             const repairInp = document.getElementById('repair-input');
-            // Usamos repair-story para mostrar los intentos restantes ya que repair-msg no existe en el HTML
-            const statusDisplay = document.getElementById('repair-story');
+            const repairStory = document.getElementById('repair-story'); // Usamos este ID que sí existe
         
             if (repairsLeft > 0) {
-                statusDisplay.innerText = `REPARACIONES DISPONIBLES: ${repairsLeft}`;[cite: 3]
+                repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES RESTANTES: ${repairsLeft}</span>`;
                 repairInp.style.display = "block";
                 repairInp.value = "";
-                repairInp.focus();
+                setTimeout(() => repairInp.focus(), 10);
             } else {
-                statusDisplay.innerText = "ERROR CRÍTICO: SIN REPARACIONES RESTANTES";[cite: 3]
+                repairStory.innerHTML = `<span style="color:var(--alert)">ERROR CRÍTICO: SIN VIDAS DE EMERGENCIA</span>`;
                 repairInp.style.display = "none";
             }
         
@@ -428,7 +427,7 @@
                     clearInterval(repairTimer);
                     document.getElementById('error-screen').style.display = 'none';
                     
-                    // Fin del juego si no hay reparaciones o llegó al máximo de alertas
+                    // Si el tiempo se agota y ya no hay vidas o llegó al límite de alertas
                     if (alertLevel >= 3 || repairsLeft <= 0) { 
                         gameOver(); 
                     } else { 
