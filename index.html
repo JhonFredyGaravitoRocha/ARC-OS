@@ -441,9 +441,10 @@
             }
 
             let btns = document.querySelectorAll('.btn');
-            let options = [res, 
-                res + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1),
-                res + (Math.random() > 0.5 ? 10 : -10)
+            let options = [
+                res, 
+                res + (Math.random() > 0.5 ? currentN1 : -currentN1),
+                res + (Math.random() > 0.5 ? currentN2 : (res > 10 ? -10 : 10))
             ].sort(() => Math.random() - 0.5);
 
             btns.forEach((b, i) => b.innerText = options[i]);
