@@ -422,9 +422,9 @@
             isChecking = false;
             updateRank();
             
-            // Eliminamos el diffBonus para que la dificultad sea constante
-            let nA = Math.floor(Math.random() * 8) + 2; // Rango fijo 2-9
-            let nB = Math.floor(Math.random() * 8) + 2; // Rango fijo 2-9
+            // Forzamos el rango estrictamente del 2 al 9
+            let nA = Math.floor(Math.random() * 8) + 2; 
+            let nB = Math.floor(Math.random() * 8) + 2;
             
             currentN1 = Math.min(nA, nB);
             currentN2 = Math.max(nA, nB);
