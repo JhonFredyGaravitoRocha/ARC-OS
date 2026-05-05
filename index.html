@@ -380,6 +380,7 @@
             updateAlertUI();
             gen(); 
         }
+        
         function check(idx, event) {
             if(isChecking) return;
             isChecking = true;
@@ -387,22 +388,21 @@
             let btns = document.querySelectorAll('.btn');
             
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
-                combo++; score++;
+                combo++; 
+                score++; // El score sube aquí
                 screenShake();
                 if(event) createParticles(event.clientX, event.clientY);
+                
                 const cTag = document.getElementById('combo-tag');
                 cTag.innerText = `X${combo}`;
                 cTag.style.opacity = combo > 1 ? 1 : 0;
-                if(combo >= 5) document.getElementById('game').classList.add('overclock-active');
-                playSound(800 + (combo * 20), 'square', 0.1);
-                
+        
+                // Comprobamos si hay desbloqueo ANTES de generar el siguiente
                 let itemIdx = collectThresholds.indexOf(score);
                 if (itemIdx !== -1) {
-                    showUnlock(itemIdx);
-                } else if (score > 200 && score % 50 === 0) {
-                    showPrestigeStar();
+                    showUnlock(itemIdx); // Esto detiene el flujo hasta cerrar el cartel
                 } else {
-                    setTimeout(gen, 150);
+                    setTimeout(gen, 150); // Si no hay cartel, genera el nivel 7 (Fracciones)
                 }
             } else {
                 handleError();
@@ -496,42 +496,30 @@
         
             } 
             // FASE 2: FRACCIONES MIXTAS (Hacks 6 a 11)
-            else if (score >= 6 && score < 12) {
+            else {
+                // En lugar de score = 0, mantén las fracciones pero aumenta la dificultad
                 grid.style.display = 'none';
                 fracCont.style.display = 'flex';
                 fracCont.innerHTML = '';
         
-                // Lógica: Entero * Denominador + Numerador
-                const whole = Math.floor(Math.random() * 2) + 1; // 1 o 2
-                const den = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                // Fracciones más difíciles (Enteros hasta 5)
+                const whole = Math.floor(Math.random() * 4) + 1; 
+                const den = [3, 4, 5, 6, 8][Math.floor(Math.random() * 5)];
                 const num = Math.floor(Math.random() * (den - 1)) + 1;
-        
                 res = (whole * den) + num; 
         
-                // Visualización del Problema
                 probDisp.innerHTML = `${whole}<span>${num}/${den}</span>`;
-        
-                let options = [res, res + 1, res - 1];
-                options.sort(() => Math.random() - 0.5);
-        
+                // ... (resto de la lógica de botones de la fase 2) ...
+                let options = [res, res + 1, res - 1].sort(() => Math.random() - 0.5);
                 options.forEach((val, i) => {
                     const circle = document.createElement('div');
                     circle.className = 'fraction-circle';
-                    // Llenado visual del tanque según el valor del botón
                     const height = (val / (res + 2)) * 100;
                     circle.innerHTML = `<div class="fraction-fill" style="height: ${height}%"></div>`;
                     fracCont.appendChild(circle);
                     btns[i].innerText = val; 
                 });
             }
-            // FASE 3: MODO ARCHITECT (Nivel 12+)
-            else {
-                // Al llegar aquí, el juego vuelve a empezar o puedes subir la dificultad
-                score = 0; 
-                gen();
-                return;
-            }
-        
             startTimer();
         }
         
