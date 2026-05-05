@@ -272,6 +272,7 @@
 
     <script>
         let errorHistory = []; // Almacena los 3 fallos que terminan la partida
+        
         const i18n = {
             es: { 
                 story: "Año 2084. La IA 'Architect' controla el mundo. Tu misión es infiltrarte en su núcleo. Para confundir a su firewall, debes elegir los datos que NO encajan.",
@@ -290,33 +291,159 @@
                 unlock: "¡MÓDULO RECUPERADO!", 
                 install: "INSTALAR", 
                 itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"],
-                itemDescs: [
-                            "Célula de plasma extraída de los servidores centrales de Architect.", 
-                            "Código malicioso de ejecución rápida diseñado para sobrecargar cortafuegos.", 
-                            "Capa de encriptación dinámica que oculta tu rastro en la red.", 
-                            "Enlace directo con la red orbital para interceptar paquetes de datos.", 
-                            "Fragmento de conciencia sintética que optimiza procesos cognitivos.", 
-                            "Unidad autónoma de asalto digital para purgar nodos de seguridad."
-                            ]
+                itemDescs: ["Célula de plasma extraída de los servidores centrales.", "Código malicioso para sobrecargar cortafuegos.", "Capa de encriptación dinámica que oculta tu rastro.", "Enlace directo para interceptar paquetes de datos.", "Fragmento sintético que optimiza procesos cognitivos.", "Unidad autónoma para purgar nodos de seguridad."]
             },
             en: { 
-                story: "Year 2084. 'Architect' AI rules the world. Choose data that DOES NOT fit.",
+                story: "Year 2084. 'Architect' AI rules the world. Your mission: infiltrate its core. To bypass the firewall, you must choose the data that DOES NOT fit.",
                 goal: "> MISSION: Node Sabotage.",
-                inst: "SABOTAGE: Tap INCORRECT result.", 
-                start: "CONNECT", 
+                inst: "SABOTAGE: Tap the INCORRECT result.", 
+                start: "CONNECT NODE", 
                 retry: "RETRY", 
-                over: "CONN LOST", 
-                rank: "RANK", 
+                over: "CONNECTION LOST", 
+                rank: "FINAL RANK", 
                 mods: "MODULES", 
                 score: "HACKS", 
-                warn_t: "LOCKED", 
-                repair_txt: "> BREACH DETECTED. Re-encrypting...",
-                track: "TRACK", 
+                warn_t: "SYSTEM LOCKED",
+                repair_txt: "> BREACH DETECTED. Re-encrypting packets...",
+                track: "TRACKING", 
                 ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], 
-                unlock: "MODULE FOUND!", 
+                unlock: "MODULE RECOVERED!", 
                 install: "INSTALL", 
-                itemNames: ["CORE", "FIRE CODE", "FIREWALL", "SAT", "IA", "BOT"],
-                itemDescs: ["Energy", "Script", "Shield", "Antenna", "AI", "Bot"]
+                itemNames: ["POWER CORE", "FIRE CODE", "ALPHA FIREWALL", "SAT RECEIVER", "CORTEX AI", "ASSAULT BOT"],
+                itemDescs: ["Plasma cell extracted from central servers.", "Fast-executing malicious code to overload firewalls.", "Dynamic encryption layer to hide your trail.", "Direct orbital link to intercept data packets.", "Synthetic consciousness fragment optimizing cognition.", "Autonomous digital assault unit to purge security nodes."]
+            },
+            ca: { 
+                story: "Any 2084. L'IA 'Architect' controla el món. La teva missió és infiltrar-te al seu nucli. Per confondre el tallafoc, has de triar les dades que NO encaixen.",
+                goal: "> OBJECTIU: Sabotatge de nodes.",
+                inst: "SABOTATGE: Toca el resultat INCORRECTE.", 
+                start: "CONNECTAR NODE", 
+                retry: "REINTENTAR", 
+                over: "CONNEXIÓ PERDUDA", 
+                rank: "RANG FINAL", 
+                mods: "MÒDULS", 
+                score: "HACKS", 
+                warn_t: "SISTEMA BLOQUEJAT",
+                repair_txt: "> BRETXA DETECTADA. Re-encriptant paquets...",
+                track: "RASTREIG", 
+                ranks: ["NOVATELL", "HACKER", "MESTRE", "ARCHITECT"], 
+                unlock: "MÒDUL RECUPERAT!", 
+                install: "INSTAL·LAR", 
+                itemNames: ["NUCLI ENERGIA", "CODI IGNIS", "TALLAFOC ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT D'ASSALT"],
+                itemDescs: ["Cèl·lula de plasma dels servidors centrals.", "Codi maliciós per sobrecarregar tallafocs.", "Capa d'encriptació dinàmica que oculta el teu rastre.", "Enllaç orbital per interceptar paquets de dades.", "Fragment sintètic que optimitza processos cognitius.", "Unitat d'assalt digital per purgar nodes de seguretat."]
+            },
+            pt: { 
+                story: "Ano 2084. A IA 'Architect' controla o mundo. Sua missão é infiltrar-se no núcleo. Para confundir o firewall, escolha os dados que NÃO se encaixam.",
+                goal: "> OBJETIVO: Sabotagem de nós.",
+                inst: "SABOTAGEM: Toque no resultado INCORRETO.", 
+                start: "CONECTAR NÓ", 
+                retry: "REPETIR", 
+                over: "CONEXÃO PERDIDA", 
+                rank: "RANK FINAL", 
+                mods: "MÓDULOS", 
+                score: "HACKS", 
+                warn_t: "SISTEMA BLOQUEADO",
+                repair_txt: "> BRECHA DETECTADA. Re-encriptando pacotes...",
+                track: "RASTREAMENTO", 
+                ranks: ["NOVATO", "HACKER", "MESTRE", "ARCHITECT"], 
+                unlock: "MÓDULO RECUPERADO!", 
+                install: "INSTALAR", 
+                itemNames: ["NÚCLEO ENERGIA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASSALTO"],
+                itemDescs: ["Célula de plasma dos servidores centrais.", "Código malicioso para sobrecarregar firewalls.", "Camada de criptografia dinâmica que oculta seu rastro.", "Link orbital para interceptar pacotes de dados.", "Fragmento sintético que otimiza processos cognitivos.", "Unidade de assalto digital para purgar nós de segurança."]
+            },
+            fr: { 
+                story: "Année 2084. L'IA 'Architect' contrôle le monde. Votre mission : infiltrer le noyau. Pour tromper le pare-feu, choisissez les données qui NE correspondent PAS.",
+                goal: "> OBJECTIF : Sabotage de nœuds.",
+                inst: "SABOTAGE : Touchez le résultat INCORRECT.", 
+                start: "CONNECTER NŒUD", 
+                retry: "RÉESSAYER", 
+                over: "CONNEXION PERDUE", 
+                rank: "RANG FINAL", 
+                mods: "MODULES", 
+                score: "HACKS", 
+                warn_t: "SYSTÈME VERROUILLÉ",
+                repair_txt: "> BRÈCHE DÉTECTÉE. Ré-encryptage des paquets...",
+                track: "TRAÇAGE", 
+                ranks: ["NOVICE", "HACKER", "MAÎTRE", "ARCHITECT"], 
+                unlock: "MODULE RÉCUPÉRÉ !", 
+                install: "INSTALLER", 
+                itemNames: ["NOYAU ÉNERGIE", "CODE IGNÉ", "PARE-FEU ALPHA", "RÉCEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"],
+                itemDescs: ["Cellule de plasma des serveurs centraux.", "Code malveillant pour surcharger les pare-feu.", "Couche de cryptage dynamique masquant votre trace.", "Lien orbital pour intercepter les paquets de données.", "Fragment synthétique optimisant les processus cognitifs.", "Unité d'assaut numérique pour purger les nœuds."]
+            },
+            de: { 
+                story: "Jahr 2084. Die KI 'Architect' beherrscht die Welt. Mission: Kern-Infiltration. Um die Firewall zu täuschen, wähle die Daten, die NICHT passen.",
+                goal: "> ZIEL: Knoten-Sabotage.",
+                inst: "SABOTAGE: Tippe auf das FALSCHE Ergebnis.", 
+                start: "KNOTEN VERBINDEN", 
+                retry: "WIEDERHOLEN", 
+                over: "VERBINDUNG VERLOREN", 
+                rank: "END-RANG", 
+                mods: "MODULEE", 
+                score: "HACKS", 
+                warn_t: "SYSTEM GESPERRT",
+                repair_txt: "> LECK ERKANNT. Pakete werden neu verschlüsselt...",
+                track: "TRACKING", 
+                ranks: ["NEULING", "HACKER", "MEISTER", "ARCHITECT"], 
+                unlock: "MODUL GEFUNDEN!", 
+                install: "INSTALLIEREN", 
+                itemNames: ["ENERGIEKERN", "FEUERCODE", "ALPHA FIREWALL", "SAT EMPFÄNGER", "CORTEX KI", "ANGRIFFSBOT"],
+                itemDescs: ["Plasmazelle von den Zentralservern.", "Schädlicher Code zur Überlastung von Firewalls.", "Dynamische Verschlüsselung zur Spurentilgung.", "Direkte Satellitenverbindung zum Datenabfang.", "Synthetisches Fragment zur kognitiven Optimierung.", "Autonome Angriffseinheit zur Knotenreinigung."]
+            },
+            zh: { 
+                story: "2084年。人工智能'Architect'统治世界。你的任务是渗透其核心。为了迷惑防火墙，你必须选择不匹配的数据。",
+                goal: "> 目标：节点破坏。",
+                inst: "破坏：点击错误的结果。", 
+                start: "连接节点", 
+                retry: "重试", 
+                over: "连接断开", 
+                rank: "最终等级", 
+                mods: "模块", 
+                score: "黑客行动", 
+                warn_t: "系统锁定",
+                repair_txt: "> 检测到漏洞。正在重新加密数据包...",
+                track: "追踪", 
+                ranks: ["菜鸟", "黑客", "大师", "Architect"], 
+                unlock: "模块已回收！", 
+                install: "安装", 
+                itemNames: ["能量核心", "代码", "防火墙", "卫星接收器", "皮层人工智能", "突击机器人"],
+                itemDescs: ["从中央服务器提取的等离子电池。", "旨在超载防火墙的恶意代码。", "隐藏踪迹的动态加密层。", "拦截数据包的卫星链接。", "优化认知过程的人工意识碎片。", "清除安全节点的自主突击单元。"]
+            },
+            hi: { 
+                story: "वर्ष 2084. 'Architect' AI दुनिया पर राज करता है। आपका मिशन इसके कोर में घुसपैठ करना है। फ़ायरवॉल को भ्रमित करने के लिए, वह डेटा चुनें जो मेल नहीं खाता।",
+                goal: "> लक्ष्य: नोड तोड़फोड़।",
+                inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", 
+                start: "नोड कनेक्ट करें", 
+                retry: "पुनः प्रयास करें", 
+                over: "कनेक्शन टूट गया", 
+                rank: "अंतिम रैंक", 
+                mods: "मॉड्यूल", 
+                score: "हैक", 
+                warn_t: "सिस्टम लॉक",
+                repair_txt: "> उल्लंघन का पता चला। पैकेट को फिर से एन्क्रिप्ट किया जा रहा है...",
+                track: "ट्रैकिंग", 
+                ranks: ["नवागंतुक", "हैकर", "मास्टर", "ARCHITECT"], 
+                unlock: "मॉड्यूल बरामद!", 
+                install: "स्थापित करें", 
+                itemNames: ["ऊर्जा कोर", "फायर कोड", "फ़ायरवॉल", "सैट रिसीवर", "कॉर्टेक्स AI", "असॉल्ट बॉट"],
+                itemDescs: ["केंद्रीय सर्वर से निकाली गई प्लाज्मा सेल।", "फ़ायरवॉल को ओवरलोड करने के लिए दुर्भावनापूर्ण कोड।", "ट्रेल छिपाने के लिए गतिशील एन्क्रिप्शन परत।", "डेटा इंटरसेप्ट करने के लिए सीधा कक्षीय लिंक।", "संज्ञानात्मक प्रक्रियाओं को अनुकूलित करने वाला अंश।", "सुरक्षा नोड्स को साफ़ करने के लिए हमलावर इकाई।"]
+            },
+            ar: { 
+                story: "عام 2084. ذكاء 'Architect' يحكم العالم. مهمتك هي اختراق النواة. لتضليل جدار الحماية، يجب اختيار البيانات غير المتطابقة.",
+                goal: "> المهمة: تخريب العقد.",
+                inst: "التخريب: اضغط على النتيجة الخاطئة.", 
+                start: "اتصال العقدة", 
+                retry: "إعادة المحاولة", 
+                over: "فقد الاتصال", 
+                rank: "التصنيف النهائي", 
+                mods: "الوحدات", 
+                score: "الاختراقات", 
+                warn_t: "النظام مغلق",
+                repair_txt: "> تم اكتشاف خرق. إعادة تشفير الحزم...",
+                track: "تتبع", 
+                ranks: ["مبتدئ", "مخترق", "خبير", "Architect"], 
+                unlock: "تم استعادة الوحدة!", 
+                install: "تثبيت", 
+                itemNames: ["नऊर्जा कोर", "كود ناري", "جدار حماية", "مستقبل سات", "ذكاء كورتيكس", "روبوت هجومي"],
+                itemDescs: ["خلية بلازما مستخرجة من الخوادم المركزية.", "كود خبيث مصمم لتعطيل جدران الحماية.", "طبقة تشفير ديناميكية لإخفاء أثرك.", "رابط مداري مباشر لاعتراض حزم البيانات.", "شظية من الوعي الاصطناعي لتحسين الإدراك.", "وحدة هجوم رقمية مستقلة لتطهير العقد الأمنية."]
             }
         };
 
@@ -579,21 +706,33 @@
                 if(current <= 0) { clearInterval(timer); check(-1); }
             }, 100);
         }
-
+        
         function updateRank() {
-            const t = i18n[currentLang];
+            // Buscamos el diccionario del idioma actual, si no existe, usamos español por defecto
+            const t = i18n[currentLang] || i18n.es;
+            
+            // Cálculo del índice de rango basado en el score
             let rankIdx = score >= 120 ? 3 : score >= 60 ? 2 : score >= 25 ? 1 : 0;
             lastRank = rankIdx;
             
+            // Sistema de estrellas para niveles superiores a 200 hacks
             let stars = "";
             if(score > 200) {
                 let numStars = Math.floor((score - 200) / 50) + 1;
-                stars = " " + "⭐".repeat(Math.min(numStars, 5)); // Máximo 5 estrellas visuales
+                stars = " " + "⭐".repeat(Math.min(numStars, 5)); 
             }
             
+            // Paleta de colores ciberpunk por rango
             const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
-            document.getElementById('rank-display').innerText = t.ranks[rankIdx] + stars;
-            document.getElementById('rank-display').style.color = colors[rankIdx];
+            const rankElement = document.getElementById('rank-display');
+        
+            if (rankElement) {
+                // Renderizado del texto traducido + estrellas
+                rankElement.innerText = t.ranks[rankIdx] + stars;
+                rankElement.style.color = colors[rankIdx];
+            }
+        
+            // Actualizamos la variable global de CSS para que los efectos de brillo (neon) coincidan
             document.documentElement.style.setProperty('--rank-color', colors[rankIdx]);
         }
 
