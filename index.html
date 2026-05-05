@@ -447,7 +447,7 @@
             }
         };
 
-        let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
+        let currentLang = 'es', score = 0, timer, repairTimer, isChecking = false;
         let repairsLeft = 3;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
         let unlockedItems = [0,0,0,0,0,0,0,0,0,0,0,0]; 
@@ -456,11 +456,13 @@
         let baseTime = 4000;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+      
         function setLang(l) {
-            playKeySound(); // Suena al elegir bandera[cite: 3]
+            playKeySound(); // Activa el audio en el primer clic[cite: 3]
             currentLang = i18n[l] ? l : 'es';[cite: 3]
             const t = i18n[currentLang];
+            
+            // Actualización de textos
             document.getElementById('t-story-body').innerText = t.story;
             document.getElementById('t-goal').innerText = t.goal;
             document.getElementById('t-instruction').innerText = t.inst;
@@ -473,20 +475,17 @@
             document.getElementById('t-warn-title').innerText = t.warn_t;
             document.getElementById('t-unlock-title').innerText = t.unlock;
             document.getElementById('t-install-btn').innerText = t.install;
+            
+            // Cambio de pantalla
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
         }
-
-        function playSound(freq, type, duration, vol = 0.1) {
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
+        
+        function playKeySound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            let frequency = 400 + (combo * 100); 
+            frequency = Math.min(frequency, 2000); 
+            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
         }
 
         function screenShake() {
@@ -524,19 +523,25 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            // Listener único para la caja de reparación
+            // Reiniciar valores por seguridad
+            score = 0;
+            combo = 0;
+            repairsLeft = 3;
+            
+            // Configurar el input de reparación una sola vez
             const repairInp = document.getElementById('repair-input');
-            repairInp.addEventListener('input', (e) => {
+            repairInp.oninput = (e) => {
                 const val = parseInt(e.target.value);
-                if(val === res) { // Si el usuario acierta la reparación
+                if(val === res) {
                     clearInterval(repairTimer);
-                    repairsLeft--; // Gasta una vida
+                    repairsLeft--;
                     playSound(1000, 'sine', 0.2);
                     document.getElementById('error-screen').style.display = 'none';
                     updateAlertUI();
-                    gen(); // Genera nuevo reto y sigue el juego
+                    gen();
                 }
-            });
+            };
+            
             updateAlertUI();
             gen(); 
         }
