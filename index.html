@@ -99,6 +99,42 @@
         /* Timer de reparación */
         #repair-timer-container { width: 200px; height: 4px; background: #333; margin-top: 10px; border-radius: 2px; overflow: hidden;}
         #repair-timer-fill { height: 100%; background: var(--alert); width: 100%; transition: linear;}
+        /* --- Nuevos Estilos para Fracciones Mixtas --- */
+        #fraction-container { 
+            display: none; 
+            gap: 15px; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .fraction-circle { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            border: 2px solid var(--rank-color); 
+            position: relative; 
+            overflow: hidden; 
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .fraction-fill { 
+            position: absolute; 
+            bottom: 0; 
+            width: 100%; 
+            background: var(--rank-color); 
+            transition: height 0.3s ease;
+        }
+        
+        /* Ajuste para que el número mixto no se rompa */
+        #prob span {
+            display: inline-block;
+            border-left: 2px solid var(--rank-color);
+            margin-left: 8px;
+            padding-left: 8px;
+            color: var(--neon-blue);
+        }
     </style>
 </head>
 <body>
@@ -199,6 +235,7 @@
         <div id="construction-area">
             <div id="house-display">🛰️</div>
             <div id="visual-grid"></div>
+            <div id="fraction-container"></div>
         </div>
         <div id="timer-bar"><div id="timer-fill"></div></div>
         <div id="prob">? x ?</div>
@@ -418,48 +455,83 @@
                 }
             }, 100);
         }
-
+        
         function gen() {
             isChecking = false;
             updateRank();
             
-            // Forzamos el rango estrictamente del 2 al 9
-            let nA = Math.floor(Math.random() * 8) + 2; 
-            let nB = Math.floor(Math.random() * 8) + 2;
-            
-            currentN1 = Math.min(nA, nB);
-            currentN2 = Math.max(nA, nB);
-            res = currentN1 * currentN2;
-
-            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
-            document.getElementById('prob').innerText = `${currentN1} × ${currentN2}`;
-            
-            // Lógica visual de puntos
             const grid = document.getElementById('visual-grid');
-            grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
-            grid.innerHTML = '';
-            // Máximo de puntos visuales para no romper la interfaz
-            const totalDots = Math.min(currentN1 * currentN2, 100); 
-            for(let i=0; i < totalDots; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                grid.appendChild(dot);
-            }
-
+            const fracCont = document.getElementById('fraction-container');
+            const probDisp = document.getElementById('prob');
             let btns = document.querySelectorAll('.btn');
-            // Opciones inteligentes: el error es sumar/restar un factor o variar un poco el resultado
-            let options = [
-                res, 
-                res + (Math.random() > 0.5 ? currentN1 : -currentN1),
-                res + (Math.random() > 0.5 ? currentN2 : (res > 10 ? -5 : 5))
-            ];
-
-            // Mezclar opciones y asignar a botones
-            options.sort(() => Math.random() - 0.5);
-            btns.forEach((b, i) => {
-                b.innerText = options[i];
-            });
-
+            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
+        
+            // FASE 1: MULTIPLICACIÓN (Hacks 0 a 5)
+            if (score < 6) {
+                grid.style.display = 'grid';
+                fracCont.style.display = 'none';
+                
+                let nA = Math.floor(Math.random() * 7) + 2; 
+                let nB = Math.floor(Math.random() * 7) + 2;
+                currentN1 = Math.min(nA, nB);
+                currentN2 = Math.max(nA, nB);
+                res = currentN1 * currentN2;
+        
+                probDisp.innerText = `${currentN1} × ${currentN2}`;
+                grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
+                grid.innerHTML = '';
+                
+                const totalDots = Math.min(res, 100); 
+                for(let i=0; i < totalDots; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    grid.appendChild(dot);
+                }
+        
+                let options = [res, res + currentN1, res - 2];
+                options = [...new Set(options)].sort(() => Math.random() - 0.5);
+                while(options.length < 3) options.push(res + 5);
+                
+                btns.forEach((b, i) => b.innerText = options[i]);
+        
+            } 
+            // FASE 2: FRACCIONES MIXTAS (Hacks 6 a 11)
+            else if (score >= 6 && score < 12) {
+                grid.style.display = 'none';
+                fracCont.style.display = 'flex';
+                fracCont.innerHTML = '';
+        
+                // Lógica: Entero * Denominador + Numerador
+                const whole = Math.floor(Math.random() * 2) + 1; // 1 o 2
+                const den = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                const num = Math.floor(Math.random() * (den - 1)) + 1;
+        
+                res = (whole * den) + num; 
+        
+                // Visualización del Problema
+                probDisp.innerHTML = `${whole}<span>${num}/${den}</span>`;
+        
+                let options = [res, res + 1, res - 1];
+                options.sort(() => Math.random() - 0.5);
+        
+                options.forEach((val, i) => {
+                    const circle = document.createElement('div');
+                    circle.className = 'fraction-circle';
+                    // Llenado visual del tanque según el valor del botón
+                    const height = (val / (res + 2)) * 100;
+                    circle.innerHTML = `<div class="fraction-fill" style="height: ${height}%"></div>`;
+                    fracCont.appendChild(circle);
+                    btns[i].innerText = val; 
+                });
+            }
+            // FASE 3: MODO ARCHITECT (Nivel 12+)
+            else {
+                // Al llegar aquí, el juego vuelve a empezar o puedes subir la dificultad
+                score = 0; 
+                gen();
+                return;
+            }
+        
             startTimer();
         }
         
