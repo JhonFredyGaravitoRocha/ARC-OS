@@ -389,36 +389,31 @@
             gen();
         }
 
-                function handleError() {
+        function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
         
-            // REGISTRO DEL ERROR
             errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
-        
             alertLevel++;
             playSound(80, 'sawtooth', 0.4);
             updateAlertUI();
         
-            // Mostramos la pantalla de error
             document.getElementById('error-screen').style.display = 'flex';
             document.getElementById('repair-story').innerText = i18n[currentLang].repair_txt;
             document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
         
-            // LÓGICA DE LÍMITE DE REPARACIONES
             const repairInp = document.getElementById('repair-input');
-            const repairMsg = document.getElementById('repair-msg');
+            // Usamos repair-story para mostrar los intentos restantes ya que repair-msg no existe en el HTML
+            const statusDisplay = document.getElementById('repair-story');
         
             if (repairsLeft > 0) {
-                // Si aún tiene reparaciones, habilitamos el input y mostramos el conteo
-                repairMsg.innerText = `REPARACIONES DISPONIBLES: ${repairsLeft}`;[cite: 2]
-                repairInp.style.display = "block";[cite: 2]
+                statusDisplay.innerText = `REPARACIONES DISPONIBLES: ${repairsLeft}`;[cite: 3]
+                repairInp.style.display = "block";
                 repairInp.value = "";
                 repairInp.focus();
             } else {
-                // Si no quedan, notificamos que el fallo es crítico y ocultamos el input
-                repairMsg.innerText = "ERROR CRÍTICO: SIN REPARACIONES RESTANTES";[cite: 2]
-                repairInp.style.display = "none";[cite: 2]
+                statusDisplay.innerText = "ERROR CRÍTICO: SIN REPARACIONES RESTANTES";[cite: 3]
+                repairInp.style.display = "none";
             }
         
             let repairTimeLeft = 100;
@@ -433,7 +428,7 @@
                     clearInterval(repairTimer);
                     document.getElementById('error-screen').style.display = 'none';
                     
-                    // Si se acaba el tiempo, termina el juego si acumuló 3 fallos O si ya no tiene reparaciones
+                    // Fin del juego si no hay reparaciones o llegó al máximo de alertas
                     if (alertLevel >= 3 || repairsLeft <= 0) { 
                         gameOver(); 
                     } else { 
