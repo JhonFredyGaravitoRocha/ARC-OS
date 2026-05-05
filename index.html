@@ -418,12 +418,16 @@
             isChecking = false;
             updateRank();
             
-            // Escalado: Aumenta el rango de números cada 7 puntos
-            let diffBonus = Math.floor(score / 7);
-            let maxN = 6 + diffBonus;
+            function gen() {
+            isChecking = false;
+            updateRank();
             
-            currentN1 = Math.floor(Math.random() * maxN) + 2;
-            currentN2 = Math.floor(Math.random() * maxN) + 2;
+            // Eliminamos el diffBonus para que la dificultad sea constante
+            let nA = Math.floor(Math.random() * 8) + 2; // Rango fijo 2-9
+            let nB = Math.floor(Math.random() * 8) + 2; // Rango fijo 2-9
+            
+            currentN1 = Math.min(nA, nB);
+            currentN2 = Math.max(nA, nB);
             res = currentN1 * currentN2;
 
             document.getElementById('phase').innerText = score.toString().padStart(2, '0');
