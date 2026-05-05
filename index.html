@@ -329,20 +329,30 @@
             document.getElementById('repair-input').addEventListener('input', (e) => {
                 if(parseInt(e.target.value) === res) {
                     clearInterval(repairTimer);
+                    
+                    // --- MECÁNICA DE REDENCIÓN ---
+                    alertLevel--; // Recupera la vida
+                    errorHistory.pop(); // Limpia el registro de errores
+                    
+                    // --- PENALIZACIÓN DE SACRIFICIO ---
+                    combo = 0; // Adiós al multiplicador
+                    document.getElementById('combo-tag').style.opacity = 0; 
+                    document.getElementById('game').classList.remove('overclock-active'); 
+                    
+                    updateAlertUI(); // Actualiza el HUD de rastreo[cite: 1]
+
                     const hackerAlert = document.getElementById('post-repair-msg');
                     hackerAlert.style.display = 'block';
                     playSound(1000, 'sine', 0.2, 0.3);
+                    
                     setTimeout(() => {
                         e.target.value = "";
                         hackerAlert.style.display = 'none';
                         document.getElementById('error-screen').style.display = 'none';
-                        if (alertLevel < 3) gen(); else gameOver();
+                        gen(); // Continúa el flujo del juego[cite: 1]
                     }, 800);
                 }
             });
-            updateAlertUI();
-            gen();
-        }
 
         function check(idx, event) {
             if(isChecking) return;
@@ -404,12 +414,14 @@
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 1;
+                // Restando 2.5 cada 100ms, la barra se vacía en 4 segundos exactos
+                repairTimeLeft -= 2.5; 
                 fill.style.width = repairTimeLeft + "%";
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
                     document.getElementById('error-screen').style.display = 'none';
-                    if (alertLevel < 3) gen(); else gameOver();
+                    // Si se acaba el tiempo y acumuló 3 fallos, Game Over[cite: 1]
+                    if (alertLevel >= 3) gameOver(); else gen(); 
                 }
             }, 100);
         }
@@ -418,8 +430,7 @@
             isChecking = false;
             updateRank();
             
-            // RANGO ESTRICTO: 2 a 9
-            // Math.random() * 8 genera 0-7.99 -> floor da 0-7 -> + 2 da 2-9
+            // Forzamos el rango estrictamente del 2 al 9
             let nA = Math.floor(Math.random() * 8) + 2; 
             let nB = Math.floor(Math.random() * 8) + 2;
             
