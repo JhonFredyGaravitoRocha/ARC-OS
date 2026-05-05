@@ -262,9 +262,10 @@
 
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
-        let unlockedItems = [0,0,0,0,0,0];
-        const itemIcons = ["🔋", "🔥", "🛡️", "📡", "🧠", "🔫"];
-        const collectThresholds = [10, 20, 30, 40, 50, 60];
+        let unlockedItems = [0,0,0,0,0,0,0,0,0,0,0,0]; 
+        const itemIcons = ["🔋", "🔥", "🛡️", "📡", "🧠", "🔫", "💎", "🚀", "🛸", "👾", "👑", "⭐"];
+        const collectThresholds = [10, 20, 30, 40, 50, 60, 80, 100, 125, 150, 175, 200];
+        let baseTime = 4000;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -360,14 +361,26 @@
                 playSound(800 + (combo * 20), 'square', 0.1);
                 
                 let itemIdx = collectThresholds.indexOf(score);
-                if(itemIdx !== -1) showUnlock(itemIdx);
-                else {
-                    document.getElementById('phase').innerText = score.toString().padStart(2, '0');
-                    gen();
+                if (itemIdx !== -1) {
+                    showUnlock(itemIdx);
+                } else if (score > 200 && score % 50 === 0) {
+                    showPrestigeStar();
+                } else {
+                    setTimeout(gen, 150);
                 }
             } else {
                 handleError();
             }
+        }
+
+        function showPrestigeStar() {
+            const starLvl = Math.floor((score - 200) / 50) + 1;
+            document.getElementById('unlock-screen').style.display = 'flex';
+            document.getElementById('unlock-icon').innerText = "⭐";
+            document.getElementById('unlock-name').innerText = "PRESTIGIO ESTELAR";
+            document.getElementById('unlock-desc').innerText = `¡Límite superado! Has alcanzado el Rango de Estrella Nivel ${starLvl}.`;
+            playSound(1200, 'sine', 0.4, 0.2);
+            gen();
         }
 
         function handleError() {
@@ -404,31 +417,39 @@
         function gen() {
             isChecking = false;
             updateRank();
-            let nA = Math.floor(Math.random() * 8) + 2; 
-            let nB = Math.floor(Math.random() * 8) + 2;
-            currentN1 = Math.min(nA, nB);
-            currentN2 = Math.max(nA, nB);
+            
+            // Escalado: Aumenta el rango de números cada 7 puntos
+            let diffBonus = Math.floor(score / 7);
+            let maxN = 6 + diffBonus;
+            
+            currentN1 = Math.floor(Math.random() * maxN) + 2;
+            currentN2 = Math.floor(Math.random() * maxN) + 2;
             res = currentN1 * currentN2;
+
+            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
             document.getElementById('prob').innerText = `${currentN1} × ${currentN2}`;
             
+            // Lógica visual de puntos
             const grid = document.getElementById('visual-grid');
             grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
             grid.innerHTML = '';
-            for(let i=0; i < (currentN1 * currentN2); i++) {
+            const totalDots = Math.min(currentN1 * currentN2, 100); // Límite visual para no romper el layout
+            for(let i=0; i < totalDots; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'dot';
                 grid.appendChild(dot);
             }
 
             let btns = document.querySelectorAll('.btn');
-            let realPos = Math.floor(Math.random() * 3);
-            btns.forEach((b, i) => {
-                if (i === realPos) b.innerText = res;
-                else b.innerText = res + (Math.random() > 0.5 ? currentN1 : -1);
-            });
+            let options = [res, 
+                res + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1),
+                res + (Math.random() > 0.5 ? 10 : -10)
+            ].sort(() => Math.random() - 0.5);
+
+            btns.forEach((b, i) => b.innerText = options[i]);
             startTimer();
         }
-
+        
         function startTimer() {
             let limit = Math.max(1.5, 8 - (score * 0.05));
             let current = 100;
@@ -442,10 +463,17 @@
 
         function updateRank() {
             const t = i18n[currentLang];
-            let rankIdx = score >= 50 ? 3 : score >= 30 ? 2 : score >= 15 ? 1 : 0;
+            let rankIdx = score >= 120 ? 3 : score >= 60 ? 2 : score >= 25 ? 1 : 0;
             lastRank = rankIdx;
+            
+            let stars = "";
+            if(score > 200) {
+                let numStars = Math.floor((score - 200) / 50) + 1;
+                stars = " " + "⭐".repeat(Math.min(numStars, 5)); // Máximo 5 estrellas visuales
+            }
+            
             const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
-            document.getElementById('rank-display').innerText = "NV." + (rankIdx+1) + " " + t.ranks[rankIdx];
+            document.getElementById('rank-display').innerText = t.ranks[rankIdx] + stars;
             document.getElementById('rank-display').style.color = colors[rankIdx];
             document.documentElement.style.setProperty('--rank-color', colors[rankIdx]);
         }
