@@ -326,20 +326,19 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
-            document.getElementById('repair-input').addEventListener('input', (e) => {
+            // Listener para la pantalla de reparación
+            const repairInp = document.getElementById('repair-input');
+            repairInp.addEventListener('input', (e) => {
                 if(parseInt(e.target.value) === res) {
                     clearInterval(repairTimer);
                     
-                    // --- MECÁNICA DE REDENCIÓN ---
-                    alertLevel--; // Recupera la vida
-                    errorHistory.pop(); // Limpia el registro de errores
-                    
-                    // --- PENALIZACIÓN DE SACRIFICIO ---
-                    combo = 0; // Adiós al multiplicador
+                    alertLevel--; 
+                    errorHistory.pop();
+                    combo = 0; 
                     document.getElementById('combo-tag').style.opacity = 0; 
                     document.getElementById('game').classList.remove('overclock-active'); 
                     
-                    updateAlertUI(); // Actualiza el HUD de rastreo[cite: 1]
+                    updateAlertUI();
 
                     const hackerAlert = document.getElementById('post-repair-msg');
                     hackerAlert.style.display = 'block';
@@ -349,11 +348,14 @@
                         e.target.value = "";
                         hackerAlert.style.display = 'none';
                         document.getElementById('error-screen').style.display = 'none';
-                        gen(); // Continúa el flujo del juego[cite: 1]
+                        gen(); 
                     }, 800);
                 }
             });
-        }
+
+            gen(); // Iniciar el primer acertijo
+        } // <--- ESTA LLAVE ES LA QUE FALTABA
+
         function check(idx, event) {
             if(isChecking) return;
             isChecking = true;
