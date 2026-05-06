@@ -471,7 +471,7 @@
         }
       
         function setLang(l) {
-            playKeySound(); // Activa el audio en la primera interacción
+            if (audioCtx.state === 'suspended') audioCtx.resume(); // <--- INTERVENCIÓN AQUÍ[cite: 3]
             currentLang = i18n[l] ? l : 'es';
             const t = i18n[currentLang];
             
@@ -495,13 +495,15 @@
         }        
         
         function playKeySound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();[cite: 3]
-            let frequency = Math.min(400 + (combo * 100), 2000);[cite: 3]
-            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
-        }
+            // 1. Despertar el audio si el navegador lo bloqueó
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();[cite: 3]
+            }
             
-            let frequency = 400 + (combo * 100); 
-            frequency = Math.min(frequency, 2000); 
+            // 2. Calcular frecuencia (sube según el combo)
+            let frequency = Math.min(400 + (combo * 100), 2000);[cite: 3]
+            
+            // 3. Ejecutar el sonido
             playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
         }
 
@@ -526,15 +528,6 @@
             }
         }
         
-        function playKeySound() {
-            // La frecuencia base sube 100Hz por cada acierto del combo[cite: 3]
-            let frequency = 400 + (combo * 100); 
-            // Limitamos a 2000Hz para que sea un pitido electrónico agradable[cite: 3]
-            frequency = Math.min(frequency, 2000); 
-            
-            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
-        }
-
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();[cite: 3]
             
@@ -642,8 +635,7 @@
                 }
             }, 100);
         }
-        
-        
+                
         function gen() {
             isChecking = false;
             updateRank();
