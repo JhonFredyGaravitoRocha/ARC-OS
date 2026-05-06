@@ -495,23 +495,13 @@
         }
         
         function playKeySound() {
-            // 1. Despertar el audio si el navegador lo bloqueó
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();[cite: 3]
             }
-            
-            // 2. Calcular frecuencia (sube según el combo)
             let frequency = Math.min(400 + (combo * 100), 2000);[cite: 3]
-            
-            // 3. Ejecutar el sonido
-            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
+            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]    
         }
-            
-            let frequency = 400 + (combo * 100); 
-            frequency = Math.min(frequency, 2000); 
-            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
-        }
-
+        
         function screenShake() {
             const game = document.getElementById('game');
             game.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
