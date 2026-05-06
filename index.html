@@ -286,14 +286,10 @@
                 score: "HACKS", 
                 warn_t: "SISTEMA BLOQUEADO",
                 repair_txt: "> BRECHA DETECTADA. Re-encriptando paquetes...",
-                repair_sync: "[!] RE-SINCRONIZA PARA EVITAR RASTREO COMPLETO",
-                repair_post: "> INTEGRIDAD RECUPERADA. PREPÁRATE PARA EL SALTO...",
                 track: "RASTREO", 
                 ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], 
                 unlock: "¡MÓDULO RECUPERADO!", 
                 install: "INSTALAR", 
-                log_title: "> LOG DE FALLOS CRÍTICOS:",
-                log_empty: "NO SE DETECTARON BRECHAS.",
                 itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"],
                 itemDescs: ["Célula de plasma extraída de los servidores centrales.", "Código malicioso para sobrecargar cortafuegos.", "Capa de encriptación dinámica que oculta tu rastro.", "Enlace directo para interceptar paquetes de datos.", "Fragmento sintético que optimiza procesos cognitivos.", "Unidad autónoma para purgar nodos de seguridad."]
             },
@@ -450,6 +446,7 @@
                 itemDescs: ["خلية بلازما مستخرجة من الخوادم المركزية.", "كود خبيث مصمم لتعطيل جدران الحماية.", "طبقة تشفير ديناميكية لإخفاء أثرك.", "رابط مداري مباشر لاعتراض حزم البيانات.", "شظية من الوعي الاصطناعي لتحسين الإدراك.", "وحدة هجوم رقمية مستقلة لتطهير العقد الأمنية."]
             }
         };
+
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
         let repairsLeft = 3;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
@@ -457,45 +454,8 @@
         const itemIcons = ["🔋", "🔥", "🛡️", "📡", "🧠", "🔫", "💎", "🚀", "🛸", "👾", "👑", "⭐"];
         const collectThresholds = [10, 20, 30, 40, 50, 60, 80, 100, 125, 150, 175, 200];
         let baseTime = 4000;
-        
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let ambientOsc, ambientGain;
-        
-        function initAmbientSound() {
-            // Sonido de fondo (Atmósfera de Datos)
-            ambientOsc = audioCtx.createOscillator();
-            ambientGain = audioCtx.createGain();
-            
-            ambientOsc.type = 'sine';
-            ambientOsc.frequency.setValueAtTime(50, audioCtx.currentTime); // Frecuencia base baja
-            ambientGain.gain.setValueAtTime(0.02, audioCtx.currentTime); // Volumen muy bajo para no molestar
-            
-            ambientOsc.connect(ambientGain);
-            ambientGain.connect(audioCtx.destination);
-            ambientOsc.start();
-            
-            // Iniciar latido rítmico (Tensión)
-            setInterval(playHeartbeat, 1000);
-        }
-        
-        function playHeartbeat() {
-            // El latido se acelera y sube de tono según el COMBO
-            const speed = Math.max(200, 1000 - (combo * 50));
-            const pitch = 60 + (combo * 5);
-            
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            
-            osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            
-            osc.connect(g);
-            g.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        }
 
         function setLang(l) {
             currentLang = i18n[l] ? l : 'es';
@@ -515,28 +475,17 @@
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
         }
-        
+
         function playSound(freq, type, duration, vol = 0.1) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
-                // Efecto de "Glitch" si el combo es alto
-                const finalFreq = combo > 10 ? freq + (Math.random() * 20) : freq;
-                
-                osc.type = type; 
-                osc.frequency.setValueAtTime(finalFreq, audioCtx.currentTime);
-                
+                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                 gain.gain.setValueAtTime(vol, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-                
-                osc.connect(gain); 
-                gain.connect(audioCtx.destination);
-                
-                osc.start(); 
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) { console.log("Audio Bloqueado"); }
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
         }
 
         function screenShake() {
@@ -562,7 +511,6 @@
 
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            initAmbientSound();
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game').style.display = 'block';
             
@@ -601,8 +549,7 @@
         
                 // Comprobamos si hay desbloqueo ANTES de generar el siguiente
                 let itemIdx = collectThresholds.indexOf(score);
-                if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
-                    playSound(440 + (combo * 20), 'triangle', 0.2, 0.1);
+                if (itemIdx !== -1) {
                     showUnlock(itemIdx); // Esto detiene el flujo hasta cerrar el cartel
                 } else {
                     setTimeout(gen, 150); // Si no hay cartel, genera el nivel 7 (Fracciones)
@@ -621,21 +568,13 @@
             playSound(1200, 'sine', 0.4, 0.2);
             gen();
         }
-        
+
         function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
+            errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
             
-            // Guardamos el error en el historial según la fase actual
-            if (score < 60) {
-                errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);[cite: 6]
-                document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;[cite: 6]
-            } else {
-                // Para la fase de fracciones, mostramos la representación textual
-                errorHistory.push(`Fracción Nivel ${score} = ${res}`);[cite: 6]
-                document.getElementById('repair-formula').innerText = "RE-SYNC: " + res;[cite: 6]
-            }
-            
+            // Si no quedan vidas, fin del juego inmediato
             if (repairsLeft <= 0) {
                 gameOver();
                 return;
@@ -643,25 +582,26 @@
         
             playSound(80, 'sawtooth', 0.4);
             document.getElementById('error-screen').style.display = 'flex';
+            document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
             
             const repairInp = document.getElementById('repair-input');
-            document.getElementById('repair-story').innerHTML = 
-                `<span style="color:var(--hacker-green)">REPARACIONES: ${repairsLeft}</span>`;
+            const repairStory = document.getElementById('repair-story');
             
+            // Mostrar cuántas vidas le quedan
+            repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES DISPONIBLES: ${repairsLeft}</span>`;
             repairInp.value = "";
             setTimeout(() => repairInp.focus(), 50);
         
-            // Reiniciar barra de tiempo de reparación[cite: 4]
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 1.5; 
+                repairTimeLeft -= 2; // Velocidad de la barra de error
                 fill.style.width = repairTimeLeft + "%";
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
-                    gameOver();
+                    gameOver(); // Si se acaba el tiempo de reparar, muere[cite: 4]
                 }
             }, 100);
         }
