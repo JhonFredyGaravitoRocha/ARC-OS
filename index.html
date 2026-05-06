@@ -4,102 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Protocolo Architect: Overclock Edition</title>
-    <style>
-        :root { 
-            --neon-blue: #00d4ff; 
-            --neon-pink: #ff007f; 
-            --space-dark: #050a14; 
-            --hacker-green: #00ff41; 
-            --alert: #ff3e3e; 
-            --rank-color: #00ff41;
-            --combo-color: #fff;
-        }
-        body { font-family: 'Courier New', monospace; background: var(--space-dark); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; transition: background 0.3s; }
+        <style>
+            :root { 
+                --neon-blue: #00d4ff; 
+                --neon-pink: #ff007f; 
+                --space-dark: #050a14; 
+                --hacker-green: #00ff41; 
+                --alert: #ff3e3e; 
+                --rank-color: #00ff41;
+                --combo-color: #fff;
+            }
+            body { font-family: 'Courier New', monospace; background: var(--space-dark); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; transition: background 0.3s; }
+            
+            #code-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; pointer-events: none; }
         
-        #code-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; pointer-events: none; }
-
-        #game { 
-            display: none;
-            background: rgba(10, 15, 26, 0.95); 
-            width: 90%; max-width: 400px; padding: 20px; 
-            border-radius: 20px; border: 3px solid var(--rank-color); 
-            position: relative; z-index: 10; text-align: center;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
-            transition: transform 0.1s, border-color 0.3s;
-        }
+            #game { 
+                display: none;
+                background: rgba(10, 15, 26, 0.95); 
+                width: 90%; max-width: 400px; padding: 20px; 
+                border-radius: 20px; border: 3px solid var(--rank-color); 
+                position: relative; z-index: 10; text-align: center;
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+                transition: transform 0.1s, border-color 0.3s;
+            }
+            
+            #hud { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--rank-color); font-size: 0.8rem; font-weight: bold; }
+            
+            #construction-area { 
+                height: 140px; background: #000; border-radius: 15px; 
+                margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; 
+                justify-content: center; position: relative; overflow: hidden;
+                border: 1px solid var(--rank-color);
+            }
+            
+            #visual-grid { display: grid; gap: 2px; margin-top: 5px; transition: opacity 0.5s; }
+            .dot { width: 6px; height: 6px; background: var(--rank-color); border-radius: 1px; }
         
-        #hud { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--rank-color); font-size: 0.8rem; font-weight: bold; }
+            #house-display { font-size: 3rem; z-index: 5; transition: transform 0.2s; }
         
-        #construction-area { 
-            height: 140px; background: #000; border-radius: 15px; 
-            margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; position: relative; overflow: hidden;
-            border: 1px solid var(--rank-color);
-        }
+            #combo-tag { position: absolute; right: 10px; top: 50px; font-size: 1.2rem; font-weight: 900; color: var(--neon-pink); opacity: 0; transform: scale(0.5); transition: 0.2s; z-index: 20; }
+            .overclock-active { animation: rgb-glow 0.5s infinite linear; border-width: 5px !important; }
+            @keyframes rgb-glow {
+                0% { border-color: #ff007f; box-shadow: 0 0 20px #ff007f; }
+                33% { border-color: #00d4ff; box-shadow: 0 0 20px #00d4ff; }
+                66% { border-color: #00ff41; box-shadow: 0 0 20px #00ff41; }
+                100% { border-color: #ff007f; box-shadow: 0 0 20px #ff007f; }
+            }
         
-        #visual-grid { display: grid; gap: 2px; margin-top: 5px; transition: opacity 0.5s; }
-        .dot { width: 6px; height: 6px; background: var(--rank-color); border-radius: 1px; }
-
-        #house-display { font-size: 3rem; z-index: 5; transition: transform 0.2s; }
-
-        #combo-tag { position: absolute; right: 10px; top: 50px; font-size: 1.2rem; font-weight: 900; color: var(--neon-pink); opacity: 0; transform: scale(0.5); transition: 0.2s; z-index: 20; }
-        .overclock-active { animation: rgb-glow 0.5s infinite linear; border-width: 5px !important; }
-        @keyframes rgb-glow {
-            0% { border-color: #ff007f; box-shadow: 0 0 20px #ff007f; }
-            33% { border-color: #00d4ff; box-shadow: 0 0 20px #00d4ff; }
-            66% { border-color: #00ff41; box-shadow: 0 0 20px #00ff41; }
-            100% { border-color: #ff007f; box-shadow: 0 0 20px #ff007f; }
-        }
-
-        .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+            .overlay-screen { position: fixed; inset: 0; background: var(--space-dark); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+            
+            #terminal-story { text-align: left; max-width: 450px; font-size: 0.9rem; border: 1px solid var(--hacker-green); padding: 20px; background: rgba(0,255,65,0.05); margin-bottom: 20px; box-shadow: 0 0 15px rgba(0,255,65,0.1); }
+            .typing { overflow: hidden; border-right: .15em solid var(--hacker-green); white-space: nowrap; animation: typing 2s steps(40, end), blink-caret .75s step-end infinite; }
+            @keyframes typing { from { width: 0 } to { width: 100% } }
+            @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--hacker-green); } }
         
-        #terminal-story { text-align: left; max-width: 450px; font-size: 0.9rem; border: 1px solid var(--hacker-green); padding: 20px; background: rgba(0,255,65,0.05); margin-bottom: 20px; box-shadow: 0 0 15px rgba(0,255,65,0.1); }
-        .typing { overflow: hidden; border-right: .15em solid var(--hacker-green); white-space: nowrap; animation: typing 2s steps(40, end), blink-caret .75s step-end infinite; }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--hacker-green); } }
-
-        #unlock-screen { background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, rgba(5,10,20,1) 80%); z-index: 500; }
-        .unlock-anim { font-size: 7rem; margin: 20px; animation: pulse 0.8s infinite alternate; filter: drop-shadow(0 0 25px var(--neon-blue)); }
-
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
-
-        #error-screen { background: rgba(15, 20, 30, 0.98); color: white; z-index: 200; border: 2px solid var(--alert); }
-        #repair-input { background: transparent; border: none; border-bottom: 3px solid var(--alert); color: white; font-family: inherit; font-size: 3rem; text-align: center; width: 200px; outline: none; margin: 20px 0; }
-
-        #timer-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
-        #timer-fill { height: 100%; background: var(--neon-pink); width: 100%; box-shadow: 0 0 10px var(--neon-pink); }
+            #unlock-screen { background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, rgba(5,10,20,1) 80%); z-index: 500; }
+            .unlock-anim { font-size: 7rem; margin: 20px; animation: pulse 0.8s infinite alternate; filter: drop-shadow(0 0 25px var(--neon-blue)); }
         
-        #prob { font-size: 3.5rem; font-weight: 900; color: var(--hacker-green); margin: 5px 0; text-shadow: 0 0 10px var(--hacker-green); }
+            @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .btn { 
-            padding: 20px 5px; font-size: 1.8rem; border: none; border-radius: 12px; 
-            background: #111827; color: var(--hacker-green); cursor: pointer; 
-            border: 1px solid #1e293b; font-family: 'Courier New', monospace;
-            transition: 0.1s;
-        }
-        .btn:active { transform: scale(0.9); }
-
-        .correct-sabotage { background: #064e3b !important; border-color: var(--hacker-green) !important; color: white; }
-        .action-btn { padding: 15px 40px; background: var(--hacker-green); color: black; font-weight: bold; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 0 15px var(--hacker-green); margin-top: 20px; text-transform: uppercase; }
-        .stat-box { margin: 15px 0; color: white; border: 1px solid #1e293b; padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.05); width: 250px; }
-        #collection-end { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-        .item { width: 35px; height: 35px; background: #1e293b; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0.2; }
-        .item.unlocked { opacity: 1; border: 1px solid var(--hacker-green); box-shadow: 0 0 5px var(--hacker-green); }
-
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; width: 100%; max-width: 380px; }
-        .lang-btn { background: #111827; border: 1px solid var(--hacker-green); color: white; padding: 10px 2px; border-radius: 12px; cursor: pointer; font-family: 'Courier New', monospace; transition: 0.3s;display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 5px;min-height: 80px;}
-        .lang-btn:hover { background: var(--hacker-green); color: black; }
-
-        .particle { position: absolute; pointer-events: none; background: var(--rank-color); width: 4px; height: 4px; border-radius: 50%; z-index: 100; }
+            #error-screen { background: rgba(15, 20, 30, 0.98); color: white; z-index: 200; border: 2px solid var(--alert); }
+            #repair-input { background: transparent; border: none; border-bottom: 3px solid var(--alert); color: white; font-family: inherit; font-size: 3rem; text-align: center; width: 200px; outline: none; margin: 20px 0; }
         
-        #unlock-desc { font-size: 0.85rem; color: #aaa; margin: 10px 40px; line-height: 1.4; font-style: italic; }
-        .hacker-alert { color: var(--hacker-green); font-family: 'Courier New', monospace; margin-top: 10px; font-size: 0.8rem; text-transform: uppercase; }
-
-        /* Timer de reparación */
-        #repair-timer-container { width: 200px; height: 4px; background: #333; margin-top: 10px; border-radius: 2px; overflow: hidden;}
-        #repair-timer-fill { height: 100%; background: var(--alert); width: 100%; transition: linear;}
-    </style>
+            #timer-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
+            #timer-fill { height: 100%; background: var(--neon-pink); width: 100%; box-shadow: 0 0 10px var(--neon-pink); }
+            
+            #prob { 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 3.5rem; 
+                font-weight: 900; 
+                color: var(--hacker-green); 
+                margin: 5px 0; 
+                text-shadow: 0 0 10px var(--hacker-green); 
+            }
+            
+            .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+            .btn { 
+                padding: 20px 5px; font-size: 1.8rem; border: none; border-radius: 12px; 
+                background: #111827; color: var(--hacker-green); cursor: pointer; 
+                border: 1px solid #1e293b; font-family: 'Courier New', monospace;
+                transition: 0.1s;
+            }
+            .btn:active { transform: scale(0.9); }
+        
+            .correct-sabotage { background: #064e3b !important; border-color: var(--hacker-green) !important; color: white; }
+            .action-btn { padding: 15px 40px; background: var(--hacker-green); color: black; font-weight: bold; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 0 15px var(--hacker-green); margin-top: 20px; text-transform: uppercase; }
+            .stat-box { margin: 15px 0; color: white; border: 1px solid #1e293b; padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.05); width: 250px; }
+            #collection-end { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+            .item { width: 35px; height: 35px; background: #1e293b; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0.2; }
+            .item.unlocked { opacity: 1; border: 1px solid var(--hacker-green); box-shadow: 0 0 5px var(--hacker-green); }
+        
+            .lang-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; width: 100%; max-width: 380px; }
+            .lang-btn { background: #111827; border: 1px solid var(--hacker-green); color: white; padding: 10px 2px; border-radius: 12px; cursor: pointer; font-family: 'Courier New', monospace; transition: 0.3s;display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 5px;min-height: 80px;}
+            .lang-btn:hover { background: var(--hacker-green); color: black; }
+        
+            .particle { position: absolute; pointer-events: none; background: var(--rank-color); width: 4px; height: 4px; border-radius: 50%; z-index: 100; }
+            
+            #unlock-desc { font-size: 0.85rem; color: #aaa; margin: 10px 40px; line-height: 1.4; font-style: italic; }
+            .hacker-alert { color: var(--hacker-green); font-family: 'Courier New', monospace; margin-top: 10px; font-size: 0.8rem; text-transform: uppercase; }
+        
+            /* Timer de reparación */
+            #repair-timer-container { width: 200px; height: 4px; background: #333; margin-top: 10px; border-radius: 2px; overflow: hidden;}
+            #repair-timer-fill { height: 100%; background: var(--alert); width: 100%; transition: linear;}
+        
+            /* --- ESTILOS FRACCIONES NATURALES (PRIMARIA) --- */
+            #fraction-container { 
+                display: none; 
+                gap: 15px; 
+                justify-content: center; 
+                align-items: center; 
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .fraction-circle { 
+                width: 50px; 
+                height: 50px; 
+                border-radius: 50%; 
+                border: 2px solid var(--rank-color); 
+                position: relative; 
+                overflow: hidden; 
+                background: rgba(0,0,0,0.3);
+            }
+            
+            .fraction-fill { 
+                position: absolute; 
+                bottom: 0; 
+                width: 100%; 
+                background: var(--rank-color); 
+                transition: height 0.3s ease;
+            }
+            
+            /* Estructura Numerador/Denominador */
+            .natural-frac {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                vertical-align: middle;
+                margin-left: 10px;
+                font-size: 0.5em; /* Proporcional al #prob */
+            }
+        
+            .frac-line {
+                width: 120%;
+                height: 3px;
+                background: var(--rank-color);
+                margin: 2px 0;
+                box-shadow: 0 0 5px var(--rank-color);
+            }
+        
+            .whole-num {
+                line-height: 1;
+            }
+        </style>
 </head>
 <body>
 
@@ -199,6 +258,7 @@
         <div id="construction-area">
             <div id="house-display">🛰️</div>
             <div id="visual-grid"></div>
+            <div id="fraction-container"></div>
         </div>
         <div id="timer-bar"><div id="timer-fill"></div></div>
         <div id="prob">? x ?</div>
@@ -212,6 +272,7 @@
 
     <script>
         let errorHistory = []; // Almacena los 3 fallos que terminan la partida
+        
         const i18n = {
             es: { 
                 story: "Año 2084. La IA 'Architect' controla el mundo. Tu misión es infiltrarte en su núcleo. Para confundir a su firewall, debes elegir los datos que NO encajan.",
@@ -234,17 +295,10 @@
                 log_title: "> LOG DE FALLOS CRÍTICOS:",
                 log_empty: "NO SE DETECTARON BRECHAS.",
                 itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"],
-                itemDescs: [
-                    "Célula de plasma extraída de los servidores centrales de Architect.", 
-                    "Código malicioso de ejecución rápida diseñado para sobrecargar cortafuegos.", 
-                    "Capa de encriptación dinámica que oculta tu rastro en la red.", 
-                    "Enlace directo con la red orbital para interceptar paquetes de datos.", 
-                    "Fragmento de conciencia sintética que optimiza procesos cognitivos.", 
-                    "Unidad autónoma de asalto digital para purgar nodos de seguridad."
-                ]
+                itemDescs: ["Célula de plasma extraída de los servidores centrales.", "Código malicioso para sobrecargar cortafuegos.", "Capa de encriptación dinámica que oculta tu rastro.", "Enlace directo para interceptar paquetes de datos.", "Fragmento sintético que optimiza procesos cognitivos.", "Unidad autónoma para purgar nodos de seguridad."]
             },
             en: { 
-                story: "Year 2084. 'Architect' AI rules the world. Your mission is to infiltrate its core. To confuse its firewall, choose the data that DOES NOT fit.",
+                story: "Year 2084. 'Architect' AI rules the world. Your mission: infiltrate its core. To bypass the firewall, you must choose the data that DOES NOT fit.",
                 goal: "> MISSION: Node Sabotage.",
                 inst: "SABOTAGE: Tap the INCORRECT result.", 
                 start: "CONNECT NODE", 
@@ -253,28 +307,17 @@
                 rank: "FINAL RANK", 
                 mods: "MODULES", 
                 score: "HACKS", 
-                warn_t: "SYSTEM LOCKED", 
+                warn_t: "SYSTEM LOCKED",
                 repair_txt: "> BREACH DETECTED. Re-encrypting packets...",
-                repair_sync: "[!] RE-SYNC TO AVOID FULL TRACKING",
-                repair_post: "> INTEGRITY RESTORED. PREPARE FOR JUMP...",
                 track: "TRACKING", 
                 ranks: ["NOVICE", "HACKER", "MASTER", "ARCHITECT"], 
                 unlock: "MODULE RECOVERED!", 
                 install: "INSTALL", 
-                log_title: "> CRITICAL FAILURE LOG:",
-                log_empty: "NO BREACHES DETECTED.",
-                itemNames: ["ENERGY CORE", "FIRE CODE", "FIREWALL ALPHA", "SAT RECEIVER", "CORTEX AI", "ASSAULT BOT"],
-                itemDescs: [
-                    "Plasma cell extracted from Architect's central servers.", 
-                    "Fast-execution malicious code designed to overload firewalls.", 
-                    "Dynamic encryption layer that hides your network trace.", 
-                    "Direct link to the orbital network to intercept data packets.", 
-                    "Fragment of synthetic consciousness that optimizes cognitive processes.", 
-                    "Autonomous digital assault unit to purge security nodes."
-                ]
+                itemNames: ["POWER CORE", "FIRE CODE", "ALPHA FIREWALL", "SAT RECEIVER", "CORTEX AI", "ASSAULT BOT"],
+                itemDescs: ["Plasma cell extracted from central servers.", "Fast-executing malicious code to overload firewalls.", "Dynamic encryption layer to hide your trail.", "Direct orbital link to intercept data packets.", "Synthetic consciousness fragment optimizing cognition.", "Autonomous digital assault unit to purge security nodes."]
             },
             ca: { 
-                story: "Any 2084. La IA 'Architect' controla el món. La teva missió és infiltrar-te al seu nucli. Per confondre el firewall, tria les dades que NO encaixen.",
+                story: "Any 2084. L'IA 'Architect' controla el món. La teva missió és infiltrar-te al seu nucli. Per confondre el tallafoc, has de triar les dades que NO encaixen.",
                 goal: "> OBJECTIU: Sabotatge de nodes.",
                 inst: "SABOTATGE: Toca el resultat INCORRECTE.", 
                 start: "CONNECTAR NODE", 
@@ -283,21 +326,17 @@
                 rank: "RANG FINAL", 
                 mods: "MÒDULS", 
                 score: "HACKS", 
-                warn_t: "SISTEMA BLOQUEJAT", 
+                warn_t: "SISTEMA BLOQUEJAT",
                 repair_txt: "> BRETXA DETECTADA. Re-encriptant paquets...",
-                repair_sync: "[!] RE-SINCRONITZA PER EVITAR RASTREIG COMPLET",
-                repair_post: "> INTEGRITAT RECUPERADA. PREPARA'T PEL SALT...",
                 track: "RASTREIG", 
                 ranks: ["NOVATELL", "HACKER", "MESTRE", "ARCHITECT"], 
                 unlock: "MÒDUL RECUPERAT!", 
                 install: "INSTAL·LAR", 
-                log_title: "> LOG DE FALLADES CRÍTIQUES:",
-                log_empty: "NO S'HAN DETECTAT BRETXES.",
-                itemNames: ["NUCLI ENERGIA", "CODI IGNIS", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT D'ASSALT"],
-                itemDescs: ["Cèl·lula de plasma dels servidors d'Architect.", "Codi maliciós per sobrecarregar tallafocs.", "Capa d'encriptació dinàmica anti-rastreig.", "Enllaç orbital per interceptar paquets.", "Fragment de consciència sintètica optimitzada.", "Unitat d'assalt digital autònoma."]
+                itemNames: ["NUCLI ENERGIA", "CODI IGNIS", "TALLAFOC ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT D'ASSALT"],
+                itemDescs: ["Cèl·lula de plasma dels servidors centrals.", "Codi maliciós per sobrecarregar tallafocs.", "Capa d'encriptació dinàmica que oculta el teu rastre.", "Enllaç orbital per interceptar paquets de dades.", "Fragment sintètic que optimitza processos cognitius.", "Unitat d'assalt digital per purgar nodes de seguretat."]
             },
             pt: { 
-                story: "Ano 2084. A IA 'Architect' controla o mundo. Sua missão é infiltrar-se no núcleo. Escolha os dados que NÃO se encaixam.",
+                story: "Ano 2084. A IA 'Architect' controla o mundo. Sua missão é infiltrar-se no núcleo. Para confundir o firewall, escolha os dados que NÃO se encaixam.",
                 goal: "> OBJETIVO: Sabotagem de nós.",
                 inst: "SABOTAGEM: Toque no resultado INCORRETO.", 
                 start: "CONECTAR NÓ", 
@@ -306,67 +345,55 @@
                 rank: "RANK FINAL", 
                 mods: "MÓDULOS", 
                 score: "HACKS", 
-                warn_t: "SISTEMA BLOQUEADO", 
+                warn_t: "SISTEMA BLOQUEADO",
                 repair_txt: "> BRECHA DETECTADA. Re-encriptando pacotes...",
-                repair_sync: "[!] RE-SINCRONIZE PARA EVITAR RASTREIO TOTAL",
-                repair_post: "> INTEGRIDADE RECUPERADA. PREPARE-SE PARA O SALTO...",
-                track: "RASTREIO", 
+                track: "RASTREAMENTO", 
                 ranks: ["NOVATO", "HACKER", "MESTRE", "ARCHITECT"], 
                 unlock: "MÓDULO RECUPERADO!", 
                 install: "INSTALAR", 
-                log_title: "> LOG DE FALHAS CRÍTICAS:",
-                log_empty: "NENHUMA BRECHA DETECTADA.",
                 itemNames: ["NÚCLEO ENERGIA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASSALTO"],
-                itemDescs: ["Célula de plasma dos servidores da Architect.", "Código malicioso para sobrecarregar firewalls.", "Camada de encriptação dinâmica de rastro.", "Link orbital para interceptar pacotes.", "Fragmento de consciência sintética avançada.", "Unidade de assalto digital autônoma."]
+                itemDescs: ["Célula de plasma dos servidores centrais.", "Código malicioso para sobrecarregar firewalls.", "Camada de criptografia dinâmica que oculta seu rastro.", "Link orbital para interceptar pacotes de dados.", "Fragmento sintético que otimiza processos cognitivos.", "Unidade de assalto digital para purgar nós de segurança."]
             },
             fr: { 
-                story: "Année 2084. L'IA 'Architect' dirige le monde. Votre mission est d'infiltrer son noyau. Choisissez les données qui ne correspondent PAS.",
+                story: "Année 2084. L'IA 'Architect' contrôle le monde. Votre mission : infiltrer le noyau. Pour tromper le pare-feu, choisissez les données qui NE correspondent PAS.",
                 goal: "> OBJECTIF : Sabotage de nœuds.",
-                inst: "SABOTAGE : Appuyez sur le résultat INCORRECT.", 
+                inst: "SABOTAGE : Touchez le résultat INCORRECT.", 
                 start: "CONNECTER NŒUD", 
                 retry: "RÉESSAYER", 
                 over: "CONNEXION PERDUE", 
                 rank: "RANG FINAL", 
                 mods: "MODULES", 
                 score: "HACKS", 
-                warn_t: "SYSTÈME BLOQUÉ", 
+                warn_t: "SYSTÈME VERROUILLÉ",
                 repair_txt: "> BRÈCHE DÉTECTÉE. Ré-encryptage des paquets...",
-                repair_sync: "[!] RE-SYNCHRONISER POUR ÉVITER LE TRAÇAGE",
-                repair_post: "> INTÉGRITÉ RESTAURÉE. PRÉPAREZ-VOUS AU SAUT...",
                 track: "TRAÇAGE", 
                 ranks: ["NOVICE", "HACKER", "MAÎTRE", "ARCHITECT"], 
                 unlock: "MODULE RÉCUPÉRÉ !", 
                 install: "INSTALLER", 
-                log_title: "> LOG D'ERREURS CRITIQUES :",
-                log_empty: "AUCUNE BRÈCHE DÉTECTÉE.",
-                itemNames: ["NOYAU ÉNERGIE", "CODE IGNÉ", "FIREWALL ALPHA", "RÉCEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"],
-                itemDescs: ["Cellule plasma des serveurs d'Architect.", "Code malveillant pour surcharger les pare-feu.", "Couche de cryptage dynamique anti-trace.", "Lien orbital pour intercepter les paquets.", "Fragment de conscience synthétique.", "Unité d'assaut numérique autonome."]
+                itemNames: ["NOYAU ÉNERGIE", "CODE IGNÉ", "PARE-FEU ALPHA", "RÉCEPTEUR SAT", "IA CORTEX", "BOT D'ASSAUT"],
+                itemDescs: ["Cellule de plasma des serveurs centraux.", "Code malveillant pour surcharger les pare-feu.", "Couche de cryptage dynamique masquant votre trace.", "Lien orbital pour intercepter les paquets de données.", "Fragment synthétique optimisant les processus cognitifs.", "Unité d'assaut numérique pour purger les nœuds."]
             },
             de: { 
-                story: "Jahr 2084. Die KI 'Architect' beherrscht die Welt. Mission: Kern infiltrieren. Wählen Sie die Daten, die NICHT passen.",
+                story: "Jahr 2084. Die KI 'Architect' beherrscht die Welt. Mission: Kern-Infiltration. Um die Firewall zu täuschen, wähle die Daten, die NICHT passen.",
                 goal: "> ZIEL: Knoten-Sabotage.",
-                inst: "SABOTAGE: Tippen Sie auf das FALSCHE Ergebnis.", 
+                inst: "SABOTAGE: Tippe auf das FALSCHE Ergebnis.", 
                 start: "KNOTEN VERBINDEN", 
                 retry: "WIEDERHOLEN", 
                 over: "VERBINDUNG VERLOREN", 
                 rank: "END-RANG", 
-                mods: "MODULE", 
+                mods: "MODULEE", 
                 score: "HACKS", 
-                warn_t: "SYSTEM GESPERRT", 
+                warn_t: "SYSTEM GESPERRT",
                 repair_txt: "> LECK ERKANNT. Pakete werden neu verschlüsselt...",
-                repair_sync: "[!] RE-SYNCHRONISIEREN GEGEN TRACKING",
-                repair_post: "> INTEGRITÄT WIEDERHERGESTELLT. BEREIT MACHEN...",
                 track: "TRACKING", 
                 ranks: ["NEULING", "HACKER", "MEISTER", "ARCHITECT"], 
                 unlock: "MODUL GEFUNDEN!", 
                 install: "INSTALLIEREN", 
-                log_title: "> KRITISCHES FEHLER-LOG:",
-                log_empty: "KEINE LECKS ERKANNT.",
-                itemNames: ["ENERGIEKERN", "FEUERCODE", "FIREWALL ALPHA", "SAT-EMPFÄNGER", "IA CORTEX", "ANGRIFFS-BOT"],
-                itemDescs: ["Plasmazelle von Architect-Servern.", "Schadcode zur Überlastung von Firewalls.", "Dynamische Verschlüsselungsschicht.", "Orbitaler Link zum Abfangen von Paketen.", "Synthetisches Bewusstseinsfragment.", "Autonome digitale Angriffseinheit."]
+                itemNames: ["ENERGIEKERN", "FEUERCODE", "ALPHA FIREWALL", "SAT EMPFÄNGER", "CORTEX KI", "ANGRIFFSBOT"],
+                itemDescs: ["Plasmazelle von den Zentralservern.", "Schädlicher Code zur Überlastung von Firewalls.", "Dynamische Verschlüsselung zur Spurentilgung.", "Direkte Satellitenverbindung zum Datenabfang.", "Synthetisches Fragment zur kognitiven Optimierung.", "Autonome Angriffseinheit zur Knotenreinigung."]
             },
             zh: { 
-                story: "2084年。人工智能'Architect'统治世界。你的任务是渗透其核心。选择不匹配的数据。",
+                story: "2084年。人工智能'Architect'统治世界。你的任务是渗透其核心。为了迷惑防火墙，你必须选择不匹配的数据。",
                 goal: "> 目标：节点破坏。",
                 inst: "破坏：点击错误的结果。", 
                 start: "连接节点", 
@@ -374,65 +401,53 @@
                 over: "连接断开", 
                 rank: "最终等级", 
                 mods: "模块", 
-                score: "入侵次数", 
-                warn_t: "系统锁定", 
-                repair_txt: "> 检测到漏洞。重新加密数据包...",
-                repair_sync: "[!] 重新同步以避免完全追踪",
-                repair_post: "> 完整性已恢复。准备跳跃...",
-                track: "追踪中", 
-                ranks: ["新手", "黑客", "大师", "Architect"], 
+                score: "黑客行动", 
+                warn_t: "系统锁定",
+                repair_txt: "> 检测到漏洞。正在重新加密数据包...",
+                track: "追踪", 
+                ranks: ["菜鸟", "黑客", "大师", "Architect"], 
                 unlock: "模块已回收！", 
                 install: "安装", 
-                log_title: "> 关键故障日志：",
-                log_empty: "未检测到漏洞。",
-                itemNames: ["能量核心", "火代码", "防火墙Alpha", "卫星接收器", "皮层AI", "突击机器人"],
-                itemDescs: ["从核心服务器提取的等离子电池。", "用于过载防火墙的恶意代码。", "隐藏踪迹的动态加密层。", "拦截数据包的轨道链接。", "优化认知的合成意识碎片。", "自主数字突击单元。"]
+                itemNames: ["能量核心", "代码", "防火墙", "卫星接收器", "皮层人工智能", "突击机器人"],
+                itemDescs: ["从中央服务器提取的等离子电池。", "旨在超载防火墙的恶意代码。", "隐藏踪迹的动态加密层。", "拦截数据包的卫星链接。", "优化认知过程的人工意识碎片。", "清除安全节点的自主突击单元。"]
             },
             hi: { 
-                story: "वर्ष 2084। AI 'Architect' दुनिया पर राज करता है। आपका मिशन कोर में घुसपैठ करना है। गलत डेटा चुनें।",
+                story: "वर्ष 2084. 'Architect' AI दुनिया पर राज करता है। आपका मिशन इसके कोर में घुसपैठ करना है। फ़ायरवॉल को भ्रमित करने के लिए, वह डेटा चुनें जो मेल नहीं खाता।",
                 goal: "> लक्ष्य: नोड तोड़फोड़।",
                 inst: "तोड़फोड़: गलत परिणाम पर टैप करें।", 
                 start: "नोड कनेक्ट करें", 
                 retry: "पुनः प्रयास करें", 
-                over: "कनेक्शन टूटा", 
+                over: "कनेक्शन टूट गया", 
                 rank: "अंतिम रैंक", 
                 mods: "मॉड्यूल", 
-                score: "हैक्स", 
-                warn_t: "सिस्टम लॉक", 
-                repair_txt: "> उल्लंघन का पता चला। पैकेट को पुनः एन्क्रिप्ट करना...",
-                repair_sync: "[!] ट्रैकिंग से बचने के लिए री-सिंक करें",
-                repair_post: "> अखंडता बहाल। छलांग के लिए तैयार रहें...",
+                score: "हैक", 
+                warn_t: "सिस्टम लॉक",
+                repair_txt: "> उल्लंघन का पता चला। पैकेट को फिर से एन्क्रिप्ट किया जा रहा है...",
                 track: "ट्रैकिंग", 
-                ranks: ["नौसिखिया", "हैकर्स", "मास्टर", "Architect"], 
-                unlock: "मॉड्यूल मिला!", 
+                ranks: ["नवागंतुक", "हैकर", "मास्टर", "ARCHITECT"], 
+                unlock: "मॉड्यूल बरामद!", 
                 install: "स्थापित करें", 
-                log_title: "> क्रिटिकल विफलता लॉग:",
-                log_empty: "कोई उल्लंघन नहीं मिला।",
-                itemNames: ["ऊर्जा कोर", "फायर कोड", "फ़ायरवॉल अल्फा", "सैट रिसीवर", "कॉर्टेक्स AI", "असॉल्ट बॉट"],
-                itemDescs: ["आर्किटेक्ट सर्वर से प्लाज्मा सेल।", "फ़ायरवॉल ओवरलोड करने के लिए कोड।", "ट्रैकिंग छिपाने के लिए एन्क्रिप्शन।", "डेटा पैकेट रोकने के लिए सैट लिंक।", "सिंथेटिक चेतना का टुकड़ा।", "डिजिटल असॉल्ट यूनिट।"]
+                itemNames: ["ऊर्जा कोर", "फायर कोड", "फ़ायरवॉल", "सैट रिसीवर", "कॉर्टेक्स AI", "असॉल्ट बॉट"],
+                itemDescs: ["केंद्रीय सर्वर से निकाली गई प्लाज्मा सेल।", "फ़ायरवॉल को ओवरलोड करने के लिए दुर्भावनापूर्ण कोड।", "ट्रेल छिपाने के लिए गतिशील एन्क्रिप्शन परत।", "डेटा इंटरसेप्ट करने के लिए सीधा कक्षीय लिंक।", "संज्ञानात्मक प्रक्रियाओं को अनुकूलित करने वाला अंश।", "सुरक्षा नोड्स को साफ़ करने के लिए हमलावर इकाई।"]
             },
             ar: { 
-                story: "عام 2084. ذكاء 'Architect' يحكم العالم. مهمتك هي اختراق النواة. اختر البيانات الخاطئة.",
-                goal: "> الهدف: تخريب العقدة.",
+                story: "عام 2084. ذكاء 'Architect' يحكم العالم. مهمتك هي اختراق النواة. لتضليل جدار الحماية، يجب اختيار البيانات غير المتطابقة.",
+                goal: "> المهمة: تخريب العقد.",
                 inst: "التخريب: اضغط على النتيجة الخاطئة.", 
                 start: "اتصال العقدة", 
                 retry: "إعادة المحاولة", 
                 over: "فقد الاتصال", 
-                rank: "الرتبة النهائية", 
+                rank: "التصنيف النهائي", 
                 mods: "الوحدات", 
-                score: "اختراقات", 
-                warn_t: "النظام مغلق", 
+                score: "الاختراقات", 
+                warn_t: "النظام مغلق",
                 repair_txt: "> تم اكتشاف خرق. إعادة تشفير الحزم...",
-                repair_sync: "[!] مزامنة لتجنب التتبع الكامل",
-                repair_post: "> تم استعادة التكامل. استعد للقفز...",
                 track: "تتبع", 
-                ranks: ["مبتدئ", "مخترق", "ماستر", "Architect"], 
+                ranks: ["مبتدئ", "مخترق", "خبير", "Architect"], 
                 unlock: "تم استعادة الوحدة!", 
                 install: "تثبيت", 
-                log_title: "> سجل الإخفاقات الحرجة:",
-                log_empty: "لم يتم اكتشاف أي خروقات.",
                 itemNames: ["नऊर्जा कोर", "كود ناري", "جدار حماية", "مستقبل سات", "ذكاء كورتيكس", "روبوت هجومي"],
-                itemDescs: ["خلية بلازما من خوادم المعماري.", "كود خبيث لزيادة تحميل الجدران.", "طبقة تشفير ديناميكية للإخفاء.", "رابط مداري لاعتراض الحزم.", "شظية وعي اصطناعي محسن.", "وحدة هجوم رقمية مستقلة."]
+                itemDescs: ["خلية بلازما مستخرجة من الخوادم المركزية.", "كود خبيث مصمم لتعطيل جدران الحماية.", "طبقة تشفير ديناميكية لإخفاء أثرك.", "رابط مداري مباشر لاعتراض حزم البيانات.", "شظية من الوعي الاصطناعي لتحسين الإدراك.", "وحدة هجوم رقمية مستقلة لتطهير العقد الأمنية."]
             }
         };
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
@@ -518,6 +533,7 @@
             updateAlertUI();
             gen(); 
         }
+        
         function check(idx, event) {
             if(isChecking) return;
             isChecking = true;
@@ -525,22 +541,21 @@
             let btns = document.querySelectorAll('.btn');
             
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
-                combo++; score++;
+                combo++; 
+                score++; // El score sube aquí
                 screenShake();
                 if(event) createParticles(event.clientX, event.clientY);
+                
                 const cTag = document.getElementById('combo-tag');
                 cTag.innerText = `X${combo}`;
                 cTag.style.opacity = combo > 1 ? 1 : 0;
-                if(combo >= 5) document.getElementById('game').classList.add('overclock-active');
-                playSound(800 + (combo * 20), 'square', 0.1);
-                
+        
+                // Comprobamos si hay desbloqueo ANTES de generar el siguiente
                 let itemIdx = collectThresholds.indexOf(score);
                 if (itemIdx !== -1) {
-                    showUnlock(itemIdx);
-                } else if (score > 200 && score % 50 === 0) {
-                    showPrestigeStar();
+                    showUnlock(itemIdx); // Esto detiene el flujo hasta cerrar el cartel
                 } else {
-                    setTimeout(gen, 150);
+                    setTimeout(gen, 150); // Si no hay cartel, genera el nivel 7 (Fracciones)
                 }
             } else {
                 handleError();
@@ -593,51 +608,97 @@
                 }
             }, 100);
         }
-
+        
+        
         function gen() {
             isChecking = false;
             updateRank();
             
-            // Forzamos el rango estrictamente del 2 al 9
-            let nA = Math.floor(Math.random() * 8) + 2; 
-            let nB = Math.floor(Math.random() * 8) + 2;
-            
-            currentN1 = Math.min(nA, nB);
-            currentN2 = Math.max(nA, nB);
-            res = currentN1 * currentN2;
-
-            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
-            document.getElementById('prob').innerText = `${currentN1} × ${currentN2}`;
-            
-            // Lógica visual de puntos
             const grid = document.getElementById('visual-grid');
-            grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
-            grid.innerHTML = '';
-            // Máximo de puntos visuales para no romper la interfaz
-            const totalDots = Math.min(currentN1 * currentN2, 100); 
-            for(let i=0; i < totalDots; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                grid.appendChild(dot);
-            }
-
+            const fracCont = document.getElementById('fraction-container');
+            const probDisp = document.getElementById('prob');
             let btns = document.querySelectorAll('.btn');
-            // Opciones inteligentes: el error es sumar/restar un factor o variar un poco el resultado
-            let options = [
-                res, 
-                res + (Math.random() > 0.5 ? currentN1 : -currentN1),
-                res + (Math.random() > 0.5 ? currentN2 : (res > 10 ? -5 : 5))
-            ];
-
-            // Mezclar opciones y asignar a botones
-            options.sort(() => Math.random() - 0.5);
-            btns.forEach((b, i) => {
-                b.innerText = options[i];
-            });
-
-            startTimer();
-        }
+            document.getElementById('phase').innerText = score.toString().padStart(2, '0');
         
+            // FASE 1: MULTIPLICACIÓN (Hasta ganar el 6º objeto: 60 hacks)
+            if (score < 60) { 
+                grid.style.display = 'grid';
+                fracCont.style.display = 'none';
+                
+                let nA = Math.floor(Math.random() * 8) + 2; 
+                let nB = Math.floor(Math.random() * 8) + 2;
+                currentN1 = Math.min(nA, nB);
+                currentN2 = Math.max(nA, nB);
+                res = currentN1 * currentN2;
+        
+                probDisp.innerText = `${currentN1} × ${currentN2}`;
+                grid.style.gridTemplateColumns = `repeat(${currentN2}, 1fr)`;
+                grid.innerHTML = '';
+                
+                const totalDots = Math.min(res, 100); 
+                for(let i=0; i < totalDots; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    grid.appendChild(dot);
+                }
+        
+                let options = [res, res + currentN1, res - currentN2];
+                options = [...new Set(options)];
+                while(options.length < 3) options.push(res + 5);
+        
+                options.sort(() => Math.random() - 0.5);
+                btns.forEach((b, i) => b.innerText = options[i]);
+        
+            } 
+            // FASE 2: FRACCIONES MIXTAS (Tras ganar el 6º objeto / 60+ Hacks)
+            else {
+                grid.style.display = 'none';
+                fracCont.style.display = 'flex';
+                fracCont.innerHTML = '';
+            
+                const whole = Math.floor(Math.random() * 2) + 1; 
+                const den = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                const num = Math.floor(Math.random() * (den - 1)) + 1;
+                res = (whole * den) + num; 
+            
+                // Visualización "Natural" (Apilada)
+                probDisp.innerHTML = `
+                    <span class="whole-number">${whole}</span>
+                    <div class="frac-container">
+                        <div>${num}</div>
+                        <div class="frac-line"></div>
+                        <div>${den}</div>
+                    </div>
+                `;
+        
+                let options = [res, res + 1, res + 2];
+                options = [...new Set(options)].sort(() => Math.random() - 0.5);
+                while(options.length < 3) options.push(res - 1);
+        
+                options.forEach((val, i) => {
+                    const circle = document.createElement('div');
+                    circle.className = 'fraction-circle';
+                    const height = (val / (res + 3)) * 100;
+                    circle.innerHTML = `<div class="fraction-fill" style="height: ${height}%"></div>`;
+                    fracCont.appendChild(circle);
+                    btns[i].innerText = val; 
+                });
+            }
+        
+            // --- AQUÍ REINTEGRAMOS EL AMBIENTE ---
+            const cTag = document.getElementById('combo-tag');
+            cTag.innerText = `X${combo}`;
+            cTag.style.opacity = combo > 1 ? 1 : 0;
+            
+            // Activar iluminación RGB si hay overclock (combo >= 5)
+            if(combo >= 5) {
+                document.getElementById('game').classList.add('overclock-active');
+            } else {
+                document.getElementById('game').classList.remove('overclock-active');
+            }
+        
+            startTimer();
+        }        
         function startTimer() {
             let limit = Math.max(1.5, 8 - (score * 0.05));
             let current = 100;
@@ -648,21 +709,33 @@
                 if(current <= 0) { clearInterval(timer); check(-1); }
             }, 100);
         }
-
+        
         function updateRank() {
-            const t = i18n[currentLang];
+            // Buscamos el diccionario del idioma actual, si no existe, usamos español por defecto
+            const t = i18n[currentLang] || i18n.es;
+            
+            // Cálculo del índice de rango basado en el score
             let rankIdx = score >= 120 ? 3 : score >= 60 ? 2 : score >= 25 ? 1 : 0;
             lastRank = rankIdx;
             
+            // Sistema de estrellas para niveles superiores a 200 hacks
             let stars = "";
             if(score > 200) {
                 let numStars = Math.floor((score - 200) / 50) + 1;
-                stars = " " + "⭐".repeat(Math.min(numStars, 5)); // Máximo 5 estrellas visuales
+                stars = " " + "⭐".repeat(Math.min(numStars, 5)); 
             }
             
+            // Paleta de colores ciberpunk por rango
             const colors = ["#00ff41", "#00d4ff", "#ffea00", "#ff007f"];
-            document.getElementById('rank-display').innerText = t.ranks[rankIdx] + stars;
-            document.getElementById('rank-display').style.color = colors[rankIdx];
+            const rankElement = document.getElementById('rank-display');
+        
+            if (rankElement) {
+                // Renderizado del texto traducido + estrellas
+                rankElement.innerText = t.ranks[rankIdx] + stars;
+                rankElement.style.color = colors[rankIdx];
+            }
+        
+            // Actualizamos la variable global de CSS para que los efectos de brillo (neon) coincidan
             document.documentElement.style.setProperty('--rank-color', colors[rankIdx]);
         }
 
