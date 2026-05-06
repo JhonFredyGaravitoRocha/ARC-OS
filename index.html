@@ -492,14 +492,14 @@
             // Transición visual[cite: 3]
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
-        }
+        }        
         
         function playKeySound() {
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();[cite: 3]
             }
             let frequency = Math.min(400 + (combo * 100), 2000);[cite: 3]
-            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]    
+            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
         }
         
         function screenShake() {
@@ -522,7 +522,7 @@
                 ], { duration: 500, easing: 'ease-out' }).onfinish = () => p.remove();
             }
         }
-        
+
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();[cite: 3]
             
