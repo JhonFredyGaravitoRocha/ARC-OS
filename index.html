@@ -571,13 +571,21 @@
             playSound(1200, 'sine', 0.4, 0.2);
             gen();
         }
-
+        
         function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
-            errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
             
-            // Si no quedan vidas, fin del juego inmediato
+            // Guardamos el error en el historial según la fase actual
+            if (score < 60) {
+                errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);[cite: 6]
+                document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;[cite: 6]
+            } else {
+                // Para la fase de fracciones, mostramos la representación textual
+                errorHistory.push(`Fracción Nivel ${score} = ${res}`);[cite: 6]
+                document.getElementById('repair-formula').innerText = "RE-SYNC: " + res;[cite: 6]
+            }
+            
             if (repairsLeft <= 0) {
                 gameOver();
                 return;
@@ -585,26 +593,25 @@
         
             playSound(80, 'sawtooth', 0.4);
             document.getElementById('error-screen').style.display = 'flex';
-            document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
             
             const repairInp = document.getElementById('repair-input');
-            const repairStory = document.getElementById('repair-story');
+            document.getElementById('repair-story').innerHTML = 
+                `<span style="color:var(--hacker-green)">REPARACIONES: ${repairsLeft}</span>`;
             
-            // Mostrar cuántas vidas le quedan
-            repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES DISPONIBLES: ${repairsLeft}</span>`;
             repairInp.value = "";
             setTimeout(() => repairInp.focus(), 50);
         
+            // Reiniciar barra de tiempo de reparación[cite: 4]
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 2; // Velocidad de la barra de error
+                repairTimeLeft -= 1.5; 
                 fill.style.width = repairTimeLeft + "%";
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
-                    gameOver(); // Si se acaba el tiempo de reparar, muere[cite: 4]
+                    gameOver();
                 }
             }, 100);
         }
