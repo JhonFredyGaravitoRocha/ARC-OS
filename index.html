@@ -509,6 +509,16 @@
             }
         }
 
+        // UBICACIÓN: Dentro de <script>, antes de startGame()
+        function playKeySound() {
+            // La frecuencia base sube 100Hz por cada acierto del combo[cite: 3]
+            let frequency = 400 + (combo * 100); 
+            // Limitamos a 2000Hz para que sea un pitido electrónico agradable[cite: 3]
+            frequency = Math.min(frequency, 2000); 
+            
+            playSound(frequency, 'sine', 0.1, 0.1);[cite: 3]
+        }
+
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             document.getElementById('start-screen').style.display = 'none';
@@ -534,28 +544,31 @@
         function check(idx, event) {
             if(isChecking) return;
             isChecking = true;
-            clearInterval(timer);
-            let btns = document.querySelectorAll('.btn');
+            clearInterval(timer);[cite: 3]
+            let btns = document.querySelectorAll('.btn');[cite: 3]
             
             if (idx !== -1 && parseInt(btns[idx].innerText) !== res) {
+                // ACIERTO: Incrementamos combo y disparamos el sonido ascendente[cite: 3]
                 combo++; 
-                score++; // El score sube aquí
-                screenShake();
-                if(event) createParticles(event.clientX, event.clientY);
+                playKeySound(); 
                 
-                const cTag = document.getElementById('combo-tag');
-                cTag.innerText = `X${combo}`;
-                cTag.style.opacity = combo > 1 ? 1 : 0;
+                score++;[cite: 3]
+                screenShake();[cite: 3]
+                if(event) createParticles(event.clientX, event.clientY);[cite: 3]
+                
+                const cTag = document.getElementById('combo-tag');[cite: 3]
+                cTag.innerText = `X${combo}`;[cite: 3]
+                cTag.style.opacity = combo > 1 ? 1 : 0;[cite: 3]
         
-                // Comprobamos si hay desbloqueo ANTES de generar el siguiente
-                let itemIdx = collectThresholds.indexOf(score);
+                let itemIdx = collectThresholds.indexOf(score);[cite: 3]
                 if (itemIdx !== -1) {
-                    showUnlock(itemIdx); // Esto detiene el flujo hasta cerrar el cartel
+                    showUnlock(itemIdx);[cite: 3]
                 } else {
-                    setTimeout(gen, 150); // Si no hay cartel, genera el nivel 7 (Fracciones)
+                    setTimeout(gen, 150);[cite: 3]
                 }
             } else {
-                handleError();
+                // ERROR: El combo vuelve a 0, reiniciando el tono del sonido[cite: 3]
+                handleError(); 
             }
         }
 
@@ -568,17 +581,12 @@
             playSound(1200, 'sine', 0.4, 0.2);
             gen();
         }
-
+        
         function handleError() {
-            combo = 0;
-            document.getElementById('game').classList.remove('overclock-active');
-            errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
-            
-            // Si no quedan vidas, fin del juego inmediato
-            if (repairsLeft <= 0) {
-                gameOver();
-                return;
-            }
+            combo = 0; // Esto hace que el próximo playKeySound() vuelva a 400Hz[cite: 3]
+            document.getElementById('game').classList.remove('overclock-active');[cite: 3]
+            // ... resto del código de error ...[cite: 3]
+        }
         
             playSound(80, 'sawtooth', 0.4);
             document.getElementById('error-screen').style.display = 'flex';
