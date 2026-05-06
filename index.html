@@ -272,6 +272,14 @@
 
     <script>
         let errorHistory = []; // Almacena los 3 fallos que terminan la partida
+        let score = 0;
+        let combo = 0;
+        let repairsLeft = 3;
+        let timer;
+        let repairTimer;
+        let isChecking = false;
+        let lastRank = 0;
+        let currentLang = 'es'; // O el idioma que desees por defecto
         
         const i18n = {
             es: { 
@@ -527,33 +535,27 @@
         }
         
         function startGame() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();[cite: 3]
+            // 1. Forzar el desbloqueo del audio para navegadores modernos
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();[cite: 5]
+            }
             
-            // Ocultar menús y mostrar área de juego[cite: 3]
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
+            // 2. Cambiar visibilidad de pantallas
+            document.getElementById('start-screen').style.display = 'none';[cite: 5]
+            document.getElementById('game').style.display = 'block';[cite: 5]
             
-            // Reset de partida
-            score = 0;
-            combo = 0;
-            repairsLeft = 3;
-            errorHistory = [];
+            // 3. Reiniciar valores de estado
+            score = 0;[cite: 5]
+            combo = 0;[cite: 5]
+            repairsLeft = 3;[cite: 5]
+            errorHistory = [];[cite: 5]
             
-            // Vincular input de reparación
-            const repairInp = document.getElementById('repair-input');
-            repairInp.oninput = (e) => {
-                if(parseInt(e.target.value) === res) {
-                    clearInterval(repairTimer);
-                    repairsLeft--;
-                    playSound(1000, 'sine', 0.2, 0.2);
-                    document.getElementById('error-screen').style.display = 'none';
-                    updateAlertUI();
-                    gen();
-                }
-            };
+            // 4. Actualizar la interfaz visual (corazones y rango)
+            updateAlertUI();[cite: 5]
+            updateRank();[cite: 5]
             
-            updateAlertUI();
-            gen(); 
+            // 5. Generar el primer problema técnico
+            gen();[cite: 5]
         }
         
         function check(idx, event) {
