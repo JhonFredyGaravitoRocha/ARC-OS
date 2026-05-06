@@ -286,14 +286,10 @@
                 score: "HACKS", 
                 warn_t: "SISTEMA BLOQUEADO",
                 repair_txt: "> BRECHA DETECTADA. Re-encriptando paquetes...",
-                repair_sync: "[!] RE-SINCRONIZA PARA EVITAR RASTREO COMPLETO",
-                repair_post: "> INTEGRIDAD RECUPERADA. PREPÁRATE PARA EL SALTO...",
                 track: "RASTREO", 
                 ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], 
                 unlock: "¡MÓDULO RECUPERADO!", 
                 install: "INSTALAR", 
-                log_title: "> LOG DE FALLOS CRÍTICOS:",
-                log_empty: "NO SE DETECTARON BRECHAS.",
                 itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"],
                 itemDescs: ["Célula de plasma extraída de los servidores centrales.", "Código malicioso para sobrecargar cortafuegos.", "Capa de encriptación dinámica que oculta tu rastro.", "Enlace directo para interceptar paquetes de datos.", "Fragmento sintético que optimiza procesos cognitivos.", "Unidad autónoma para purgar nodos de seguridad."]
             },
@@ -450,6 +446,7 @@
                 itemDescs: ["خلية بلازما مستخرجة من الخوادم المركزية.", "كود خبيث مصمم لتعطيل جدران الحماية.", "طبقة تشفير ديناميكية لإخفاء أثرك.", "رابط مداري مباشر لاعتراض حزم البيانات.", "شظية من الوعي الاصطناعي لتحسين الإدراك.", "وحدة هجوم رقمية مستقلة لتطهير العقد الأمنية."]
             }
         };
+
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
         let repairsLeft = 3;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
@@ -571,21 +568,13 @@
             playSound(1200, 'sine', 0.4, 0.2);
             gen();
         }
-        
+
         function handleError() {
             combo = 0;
             document.getElementById('game').classList.remove('overclock-active');
+            errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);
             
-            // Guardamos el error en el historial según la fase actual
-            if (score < 60) {
-                errorHistory.push(`${currentN1} × ${currentN2} = ${res}`);[cite: 6]
-                document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;[cite: 6]
-            } else {
-                // Para la fase de fracciones, mostramos la representación textual
-                errorHistory.push(`Fracción Nivel ${score} = ${res}`);[cite: 6]
-                document.getElementById('repair-formula').innerText = "RE-SYNC: " + res;[cite: 6]
-            }
-            
+            // Si no quedan vidas, fin del juego inmediato
             if (repairsLeft <= 0) {
                 gameOver();
                 return;
@@ -593,25 +582,26 @@
         
             playSound(80, 'sawtooth', 0.4);
             document.getElementById('error-screen').style.display = 'flex';
+            document.getElementById('repair-formula').innerText = `${currentN1} × ${currentN2} = ?`;
             
             const repairInp = document.getElementById('repair-input');
-            document.getElementById('repair-story').innerHTML = 
-                `<span style="color:var(--hacker-green)">REPARACIONES: ${repairsLeft}</span>`;
+            const repairStory = document.getElementById('repair-story');
             
+            // Mostrar cuántas vidas le quedan
+            repairStory.innerHTML = `<span style="color:var(--hacker-green)">REPARACIONES DISPONIBLES: ${repairsLeft}</span>`;
             repairInp.value = "";
             setTimeout(() => repairInp.focus(), 50);
         
-            // Reiniciar barra de tiempo de reparación[cite: 4]
             let repairTimeLeft = 100;
             const fill = document.getElementById('repair-timer-fill');
             clearInterval(repairTimer);
             
             repairTimer = setInterval(() => {
-                repairTimeLeft -= 1.5; 
+                repairTimeLeft -= 2; // Velocidad de la barra de error
                 fill.style.width = repairTimeLeft + "%";
                 if(repairTimeLeft <= 0) {
                     clearInterval(repairTimer);
-                    gameOver();
+                    gameOver(); // Si se acaba el tiempo de reparar, muere[cite: 4]
                 }
             }, 100);
         }
