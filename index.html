@@ -467,13 +467,18 @@
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
         }
-      
+        
+        
         function setLang(l) {
-            playKeySound(); // Activa el audio en la primera interacción
+            // Primero activamos el contexto de audio
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
             currentLang = i18n[l] ? l : 'es';
             const t = i18n[currentLang];
             
-            // Inyectar textos traducidos
+            // Inyectar textos
             document.getElementById('t-story-body').innerText = t.story;
             document.getElementById('t-goal').innerText = t.goal;
             document.getElementById('t-instruction').innerText = t.inst;
@@ -487,10 +492,12 @@
             document.getElementById('t-unlock-title').innerText = t.unlock;
             document.getElementById('t-install-btn').innerText = t.install;
             
-            // Transición visual[cite: 3]
+            // Sonido de confirmación
+            playSound(600, 'sine', 0.1, 0.1);
+            
             document.getElementById('lang-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
-        }        
+        }       
         
         function playKeySound() {
             if (audioCtx.state === 'suspended') {
