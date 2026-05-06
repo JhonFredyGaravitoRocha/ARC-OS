@@ -286,10 +286,14 @@
                 score: "HACKS", 
                 warn_t: "SISTEMA BLOQUEADO",
                 repair_txt: "> BRECHA DETECTADA. Re-encriptando paquetes...",
+                repair_sync: "[!] RE-SINCRONIZA PARA EVITAR RASTREO COMPLETO",
+                repair_post: "> INTEGRIDAD RECUPERADA. PREPÁRATE PARA EL SALTO...",
                 track: "RASTREO", 
                 ranks: ["NOVATO", "HACKER", "MAESTRO", "ARCHITECT"], 
                 unlock: "¡MÓDULO RECUPERADO!", 
                 install: "INSTALAR", 
+                log_title: "> LOG DE FALLOS CRÍTICOS:",
+                log_empty: "NO SE DETECTARON BRECHAS.",
                 itemNames: ["NÚCLEO ENERGÍA", "CÓDIGO ÍGNEO", "FIREWALL ALPHA", "RECEPTOR SAT", "IA CORTEX", "BOT DE ASALTO"],
                 itemDescs: ["Célula de plasma extraída de los servidores centrales.", "Código malicioso para sobrecargar cortafuegos.", "Capa de encriptación dinámica que oculta tu rastro.", "Enlace directo para interceptar paquetes de datos.", "Fragmento sintético que optimiza procesos cognitivos.", "Unidad autónoma para purgar nodos de seguridad."]
             },
@@ -446,7 +450,6 @@
                 itemDescs: ["خلية بلازما مستخرجة من الخوادم المركزية.", "كود خبيث مصمم لتعطيل جدران الحماية.", "طبقة تشفير ديناميكية لإخفاء أثرك.", "رابط مداري مباشر لاعتراض حزم البيانات.", "شظية من الوعي الاصطناعي لتحسين الإدراك.", "وحدة هجوم رقمية مستقلة لتطهير العقد الأمنية."]
             }
         };
-
         let currentLang = 'es', score = 0, alertLevel = 0, timer, repairTimer, isChecking = false;
         let repairsLeft = 3;
         let currentN1, currentN2, res, combo = 0, lastRank = 0;
